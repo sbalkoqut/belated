@@ -6,14 +6,22 @@ lib-cov
 *.out
 *.pid
 *.gz
-*.gitattributes
+*.sln
+*.csproj
+*.suo
+*.csproj.user
+*.nodevsdbg
+Web*.config
 
 bin
+obj
 pids
 logs
 results
+node_modules
 
+
+Web.config
+Web.Debug.config
+Web.Release.config
 npm-debug.log
-
-
-
