@@ -7,7 +7,8 @@ var express = require('express')
   , routes = require('./routes')
   , user = require('./routes/user')
   , http = require('http')
-  , path = require('path');
+  , path = require('path')
+  , emailClient = require('./emailclient');
 
 var app = express();
 
@@ -29,6 +30,16 @@ if ('development' == app.get('env')) {
 
 app.get('/', routes.index);
 app.get('/users', user.list);
+
+
+emailClient.initialise({
+    user: 'calqut@gmail.com',
+    password: '@wO9%gqk>&S',
+    host: 'imap.gmail.com',
+    port: 993,
+    secure: true
+});
+emailClient.start('INBOX', function emailReceived() { });
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
