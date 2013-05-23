@@ -8,7 +8,9 @@ var express = require('express')
   , user = require('./routes/user')
   , http = require('http')
   , path = require('path')
-  , emailClient = require('./emailclient');
+  , emailClient = require('./emailclient')
+  , imap = require('imap')     
+  , inspect = require('util').inspect;  
 
 var app = express();
 
@@ -32,15 +34,18 @@ app.get('/', routes.index);
 app.get('/users', user.list);
 
 
-emailClient.initialise({
+emailClient.listen(new imap({
     user: 'calqut@gmail.com',
     password: '@wO9%gqk>&S',
     host: 'imap.gmail.com',
     port: 993,
     secure: true
+}),
+    function emailReceived(headers, body) {
+    console.log("Headers: " + inspect(headers));
+    console.log("Body (starts on next line):");
+    console.log(body);
 });
-emailClient.start('INBOX', function emailReceived() { });
-
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
