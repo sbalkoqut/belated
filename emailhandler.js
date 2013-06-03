@@ -34,7 +34,8 @@ function initialise(meetingCallback) {
             var organiser = handlePerson(properties.ORGANIZER[0]);
             var attendees = handlePeople(properties.ATTENDEE);
             var subject = properties.SUMMARY[0].value;
-
+            var description = properties.DESCRIPTION[0].value;
+            console.log(inspect(event, { depth: 4 }));
             mapquest.geocode(location, function (error, result) {
                 if (error || result === undefined || result.latLng === undefined) {
                     meetingCallback(new Error('Could not geocode "' + location + '".'));
@@ -48,7 +49,8 @@ function initialise(meetingCallback) {
                     end: endDate,
                     organiser: organiser,
                     attendees: attendees,
-                    subject: subject
+                    subject: subject,
+                    description: description
                 };
 
                 meetingCallback(undefined, meeting);
