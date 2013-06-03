@@ -58,7 +58,7 @@ function initialise(meetingCallback) {
         }
 
         try {
-            var calendar = icalendar.parse_calendar(body);
+            var calendar = icalendar.parse_calendar(body.trim() + "\r\n");
             var events = calendar.events();
 
             for (var i = 0; i < events.length; i++) {
@@ -66,6 +66,7 @@ function initialise(meetingCallback) {
             }
         }
         catch (error) {
+            console.log("Calendar parsing error. ");
             meetingCallback(error);
         }
     }
