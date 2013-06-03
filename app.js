@@ -9,8 +9,9 @@ var express = require('express')
   , http = require('http')
   , path = require('path')
   , emailClient = require('./emailclient')
-  , imap = require('imap')     
-  , inspect = require('util').inspect;  
+  , imap = require('imap')
+  , emailHandler = require('./emailhandler')
+  , inspect = require('util').inspect;
 
 var app = express();
 
@@ -33,19 +34,24 @@ if ('development' == app.get('env')) {
 app.get('/', routes.index);
 app.get('/users', user.list);
 
-
-emailClient.listen(new imap({
-    user: 'calqut@gmail.com',
-    password: '@wO9%gqk>&S',
-    host: 'imap.gmail.com',
-    port: 993,
-    secure: true
-}),
-    function emailReceived(headers, body) {
-    console.log("Headers: " + inspect(headers));
-    console.log("Body (starts on next line):");
-    console.log(body);
+var emailHandler = emailHandler.initialise(function (error, meeting) {
+    if (error)
+        console.log("A meeting was not added. " + error);
+    else {
+        console.log("Meeting received: " + inspect(meeting));
+    }
 });
+emailClient.listen(
+    new imap({
+        user: 'calqut@gmail.com',
+        password: '@wO9%gqk>&S',
+        host: 'imap.gmail.com',
+        port: 993,
+        secure: true
+    }),
+    emailHandler,
+    true);
+
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });

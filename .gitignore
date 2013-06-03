@@ -18,7 +18,7 @@ obj
 pids
 logs
 results
-node_modules
+node_modules/*
 
 
 Web.config

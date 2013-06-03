@@ -69,15 +69,11 @@ function listen(imapConnection, newMessageCallback, debug) {
 
 
         // Now that we have opened the mailbox for the first time since connecting, check the mailbox.
-        // We don't know how many mail messages have been received, so just say 0.
-
-        log("[IMAP] Doing initial check for email.");
         checkMail();
     }
 
     function mailAvailable(numberOfMessages) {
 
-        log("[IMAP] " + numberOfMessages.toString() + " emails have become available.");
         checkMail();
     }
 
@@ -110,7 +106,7 @@ function listen(imapConnection, newMessageCallback, debug) {
         var itemsFound = (results == null) ? 0 : results.length;
 
         // Report the number found
-        log("[IMAP] " + itemsFound.toString() + " items were found.");
+        log("[IMAP] " + itemsFound.toString() + " items are available.");
 
         // If there are no results
         if (itemsFound == 0) {
@@ -154,16 +150,14 @@ function listen(imapConnection, newMessageCallback, debug) {
         var messageBody = "";
 
         function addMessageHeaders(headers) {
-            log("[IMAP] Fetched message headers.");
             messageHeaders = headers;
         }
         function addMessageData(chunk) {
-            log("[IMAP] Fetched a message part.");
             messageBody += chunk;
         }
 
         function finaliseMessage() {
-            log("[IMAP] Finished fetching message.");
+            log("[IMAP] Finished fetching message #" + message.seqno + ".");
             newMessageCallback(messageHeaders, messageBody);
         }
 
