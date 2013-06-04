@@ -2,10 +2,10 @@
   , mapquest = require('mapquest')
   , inspect = require('util').inspect;
 
-function initialise(meetingCallback) {
-    function handleEmail(headers, body) {
-        function handleEvent(event) {
-            function handlePerson(contact) {
+function create(meetingCallback) {
+    function emailHandler(headers, body) {
+        function event(event) {
+            function person(contact) {
                 var email = contact.value;
                 if (email.length > 7 && email.substr(0, 7).toLowerCase() == "mailto:")
                     email = email.substr(7, email.length - 7);
@@ -19,10 +19,10 @@ function initialise(meetingCallback) {
                     email: email
                 };
             }
-            function handlePeople(contacts) {
+            function people(contacts) {
                 var people = [];
                 for (var i = 0; i < contacts.length; i++) {
-                    people[i] = handlePerson(contacts[i]);
+                    people[i] = person(contacts[i]);
                 }
                 return people;
             }
@@ -31,8 +31,8 @@ function initialise(meetingCallback) {
             var location = properties.LOCATION[0].value;
             var startDate = properties.DTSTART[0].value;
             var endDate = properties.DTEND[0].value;
-            var organiser = handlePerson(properties.ORGANIZER[0]);
-            var attendees = handlePeople(properties.ATTENDEE);
+            var organiser = person(properties.ORGANIZER[0]);
+            var attendees = people(properties.ATTENDEE);
             var subject = properties.SUMMARY[0].value;
             var description = properties.DESCRIPTION[0].value;
 
@@ -43,8 +43,8 @@ function initialise(meetingCallback) {
                 }
 
                 var meeting = {
-                    lat: result.latLng.lat,
-                    lng: result.latLng.lng,
+                    latitude: result.latLng.lat,
+                    longitude: result.latLng.lng,
                     start: startDate,
                     end: endDate,
                     organiser: organiser,
@@ -62,7 +62,7 @@ function initialise(meetingCallback) {
             var events = calendar.events();
 
             for (var i = 0; i < events.length; i++) {
-                handleEvent(events[i]);
+                event(events[i]);
             }
         }
         catch (error) {
@@ -70,6 +70,6 @@ function initialise(meetingCallback) {
             meetingCallback(error);
         }
     }
-    return handleEmail;
+    return emailHandler;
 }
-exports.initialise = initialise;
+exports.create = create;

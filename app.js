@@ -11,6 +11,8 @@ var express = require('express')
   , emailClient = require('./emailclient')
   , imap = require('imap')
   , emailHandler = require('./emailhandler')
+  , meetingStore = require('./meetingstore')
+  , locationStore = require('./locationstore')
   , inspect = require('util').inspect;
 
 var app = express();
@@ -34,13 +36,8 @@ if ('development' == app.get('env')) {
 app.get('/', routes.index);
 app.get('/users', user.list);
 
-var emailHandler = emailHandler.initialise(function (error, meeting) {
-    if (error)
-        console.log("A meeting was not added. " + error);
-    else {
-        console.log("Meeting received: " + inspect(meeting));
-    }
-});
+app.all('/location', locationStore.location);
+
 emailClient.listen(
     new imap({
         user: 'calqut@gmail.com',
@@ -49,7 +46,14 @@ emailClient.listen(
         port: 993,
         secure: true
     }),
-    emailHandler,
+    emailHandler.create(function (error, meeting) {
+        if (error)
+            console.log("A meeting was not added. " + error);
+        else {
+            console.log("Meeting received: " + inspect(meeting));
+            meetingStore.add(meeting);
+        }
+    }),
     true);
 
 http.createServer(app).listen(app.get('port'), function(){
