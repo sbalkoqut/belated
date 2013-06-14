@@ -1,63 +1,65 @@
 ﻿
-var allMeetings = [];
+function create() {
+    var allMeetings = [];
 
-function add(meeting) {
-    if (meeting.end === undefined)
-        throw new Error("Meeting doesn't have a valid end date when to purge.");
+    function add(meeting) {
+        if (meeting.start === undefined || meeting.end === undefined)
+            throw new Error("Meeting doesn't have a valid start or end date.");
 
-    // Insert according to meeting end date; meetings ending later at the end.
-    var insertIndex = allMeetings.length;
-    var insertDate = meeting.end.getUTCDate();
-    for (var i = 0; i < allMeetings.length; i++) {
-        var currentDate = allMeetings[i].end.getUTCDate();
-        if (insertDate < currentDate) {
-            insertIndex = i;
-            break;
+        // Insert according to meeting end date; meetings ending later at the end.
+        var insertIndex = allMeetings.length;
+        var insertTime = meeting.start.getTime();
+        for (var i = 0; i < allMeetings.length; i++) {
+            var currentTime = allMeetings[i].start.getTime();
+            if (insertTime < currentTime) {
+                insertIndex = i;
+                break;
+            }
         }
+        allMeetings.splice(insertIndex, 0, meeting);
     }
-    meetings.splice(insertIndex, 0, meeting);
-}
 
-function find(participantEmail) {
-    var meetings = [];
-    for (var i = 0; i < allMeetings.length; i++) {
-        var meeting = allMeetings[i];
+    function find(participantEmail) {
+        var meetings = [];
+        for (var i = 0; i < allMeetings.length; i++) {
+            var meeting = allMeetings[i];
 
-        if (meeting.organiser.email === participantEmail) {
-            meetings.push(meeting);
-        }
-        else {
-            for (var a = 0; a < meeting.attendees.length; a++) {
-                var attendee = meeting.attendees[a];
-                if (attendee.email === participantEmail) {
-                    meetings.push(meeting);
-                    break;
+            if (meeting.organiser.email === participantEmail) {
+                meetings.push(meeting);
+            }
+            else {
+                for (var a = 0; a < meeting.attendees.length; a++) {
+                    var attendee = meeting.attendees[a];
+                    if (attendee.email === participantEmail) {
+                        meetings.push(meeting);
+                        break;
+                    }
                 }
             }
         }
+        return meetings;
     }
-    return meetings;
-}
 
-function meetings() {
-    return allMeetings;
-}
+    function getMeetingsWithin(earliestStart, latestStart) {
+        var earliest = earliestStart.getTime();
+        var latest = latestStart.getTime();
+        var result = [];
+        for (var i = 0; i < allMeetings.length; i++) {
+            var currentMeeting = allMeetings[i];
+            var currentStart = currentMeeting.start.getTime();
+            if (currentStart > latest) {
+                return result;
+            }
+            else if (currentStart >= earliest) {
+                result.push(currentMeeting);
+            }
 
-function clean() {
-    var now = new Date().getUTCDate();
-    var itemsToRemove = 0;
-    for (var i = 0; i < allMeetings.length; i++) {
-        var meeting = allMeetings[i];
-        var endDate = meeting.end.getUTCDate();
-        if (now > endDate)
-            itemsToRemove += 1;
-        else
-            break;
+        }
+        return result;
     }
-    allMeetings.splice(0, itemsToRemove);
+    return {
+        add: add,
+        getMeetingsWithin: getMeetingsWithin
+    };
 }
-
-exports.add = add;
-exports.find = find;
-exports.meetings = meetings;
-exports.clean = clean;
+exports.create = create;
