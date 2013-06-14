@@ -1,11 +1,11 @@
-﻿var icalendar = require('icalendar')
-  , mapquest = require('mapquest')
-  , inspect = require('util').inspect;
+﻿
+var icalendar = require('icalendar')
+  , mapquest = require('mapquest');
 
 function create(meetingCallback) {
     function emailHandler(headers, body) {
         function event(event) {
-            function person(contact) {
+            function toPerson(contact) {
                 var email = contact.value;
                 if (email.length > 7 && email.substr(0, 7).toLowerCase() == "mailto:")
                     email = email.substr(7, email.length - 7);
@@ -19,10 +19,13 @@ function create(meetingCallback) {
                     email: email
                 };
             }
-            function people(contacts) {
+            function toPeople(contacts) {
                 var people = [];
                 for (var i = 0; i < contacts.length; i++) {
-                    people[i] = person(contacts[i]);
+                    var person = toPerson(contacts[i]);
+                    if (person.email.toLowerCase() !== "calqut@gmail.com") {
+                        people.push(person);
+                    }
                 }
                 return people;
             }
@@ -31,8 +34,8 @@ function create(meetingCallback) {
             var location = properties.LOCATION[0].value;
             var startDate = properties.DTSTART[0].value;
             var endDate = properties.DTEND[0].value;
-            var organiser = person(properties.ORGANIZER[0]);
-            var attendees = people(properties.ATTENDEE);
+            var organiser = toPerson(properties.ORGANIZER[0]);
+            var attendees = toPeople(properties.ATTENDEE);
             var subject = properties.SUMMARY[0].value;
             var description = properties.DESCRIPTION[0].value;
 
