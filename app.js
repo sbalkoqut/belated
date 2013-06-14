@@ -11,9 +11,9 @@ var express = require('express')
   , emailClient = require('./emailclient')
   , imap = require('imap')
   , emailHandler = require('./emailhandler')
-  , meetingStore = require('./meetingstore')
-  , locationStore = require('./locationstore')
-  , inspect = require('util').inspect;
+  , locationHandler = require('./locationhandler')
+  , inspect = require('util').inspect
+  , notificationManager = require('./notificationmanager').start();
 
 var app = express();
 
@@ -33,10 +33,22 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
+
+
 app.get('/', routes.index);
 app.get('/users', user.list);
 
-app.all('/location', locationStore.location);
+app.all('/location', locationHandler.create(function(error, location)
+{
+    if (error)
+        console.log("[LOCATION] An update failed. " + error);
+    else
+    {
+        console.log("[LOCATION] received: " + inspect(location));
+        notificationManager.handleLocation(location);
+    }
+}));
+
 
 emailClient.listen(
     new imap({
@@ -51,7 +63,7 @@ emailClient.listen(
             console.log("A meeting was not added. " + error);
         else {
             console.log("Meeting received: " + inspect(meeting));
-            meetingStore.add(meeting);
+            notificationManager.handleMeeting(meeting);
         }
     }),
     true);
