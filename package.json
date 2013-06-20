@@ -8,11 +8,17 @@
   },
   "dependencies": {
     "express": "3.2.3",
-    "jade": "*",
+    "jade": "0.31.1",
 	"mocha": "1.9.0",
 	"imap": "0.7.11",
-	"node-schedule": "*",
-	"geo-distance-js": "*"
+	"node-schedule": "0.1.8",
+	"geo-distance-js": "0.0.2",
+    "dateformat": "1.0.6-1.2.3",
+    "express-mailer": "0.2.0",
+    "icalendar": "0.6.3",
+    "mapquest": "0.0.1",
+    "mockery": "1.4.0",
+    "nodemock": "0.2.17"
   },
   "repository": {
     "type": "git",
