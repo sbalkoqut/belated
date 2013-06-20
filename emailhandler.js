@@ -37,7 +37,7 @@ function create(meetingCallback) {
             var organiser = toPerson(properties.ORGANIZER[0]);
             var attendees = toPeople(properties.ATTENDEE);
             var subject = properties.SUMMARY[0].value;
-            var description = properties.DESCRIPTION[0].value;
+            var description = properties.DESCRIPTION[0].value.trim();
 
             mapquest.geocode(location, function (error, result) {
                 if (error || result === undefined || result.latLng === undefined) {
@@ -46,6 +46,7 @@ function create(meetingCallback) {
                 }
 
                 var meeting = {
+                    location: location,
                     latitude: result.latLng.lat,
                     longitude: result.latLng.lng,
                     start: startDate,
