@@ -6,7 +6,7 @@ var fs = require("fs");
 
 describe("emailHandler", function () {
 
-    var allowedModules = ["icalendar", "../emailhandler", "assert", "util", "./icalendar", "./base", "./types", "./rrule", "./timezone", "./event", "./parser"];
+    var allowedModules = ["icalendar", "../emailhandler", "assert", "util", "./icalendar", "./base", "./types", "./rrule", "./timezone", "./event", "./parser", "./log"];
 
     before(function () {
         mockery.enable();
@@ -39,7 +39,8 @@ describe("emailHandler", function () {
                     email: "johnny.smith@gmail.com"
                 }],
                 subject: "Meeting Subject",
-                description: "Meeting body."
+                description: "Meeting body.",
+                emailId: "<BLU501-EAS310DE2D852A184325678890876F1@gbm.phl>"
             };
             var handler = emailhandler.create(function (error, meeting) {
                 assert.strictEqual(error, undefined, "No error should occur.");
@@ -47,7 +48,7 @@ describe("emailHandler", function () {
                 done();
             });
             
-            handler(undefined, email);
+            handler({ "message-id": "<BLU501-EAS310DE2D852A184325678890876F1@gbm.phl>"}, email);
 
             mockery.deregisterMock("mapquest");
         });

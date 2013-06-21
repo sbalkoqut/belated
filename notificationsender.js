@@ -1,7 +1,11 @@
 ﻿var inspect = require("util").inspect;
 var dateFormat = require("dateformat");
+var nodemailer = require("nodemailer");
+var config = require("./config.json").notificationsender;
+var log = require("./log")("smtp");
 
 function create(app) {
+    var smtpTransport = nodemailer.createTransport("SMTP", config);
 
     function send(meeting, attendeeReports) {
         function sameDay(a, b)
@@ -16,7 +20,6 @@ function create(app) {
             var allComfortablyOnTime = true;
             for (var i = 0; i < attendeeReports.length; i++) {
                 var attendeeReport = attendeeReports[i];
-                console.log(inspect(attendeeReport, { depth: 4 }));
                 if (attendeeReport.late) {
                     someoneLate = true;
                 }
@@ -34,40 +37,44 @@ function create(app) {
             }
             return introductoryText;
         }
-        console.log(inspect(meeting, { depth: 4 }));
-
         var start = dateFormat(meeting.start, "dddd mmmm d, yyyy h:MM tt");
 
-        var end;
-        if (sameDay(meeting.start, meeting.end))
-            end = dateFormat(meeting.end, "h:MM tt");
-        else
-            end = dateFormat(meeting.end, "dddd mmmm d, yyyy h:MM tt");
+        var end = sameDay(meeting.start, meeting.end) ? dateFormat(meeting.end, "h:MM tt")
+                                                      : dateFormat(meeting.end, "dddd mmmm d, yyyy h:MM tt");
 
         var description = meeting.description.replace(/\n/g, '<br>');
 
-        var subject = meeting.subject + " @ " + start;
-        app.mailer.send("email", {
-            to: meeting.organiser.email,
-            subject: subject,
-
+        var templateFields = {
             intro: introduction(),
-            meetingsubject: meeting.subject,
+            subject: meeting.subject,
             description: description,
             start: start,
             end: end,
             latitude: meeting.latitude,
             longitude: meeting.longitude,
             location: meeting.location,
-            attendees: attendeeReports,
-        }, function (error) {
+            attendees: attendeeReports
+        };
+        app.render("email", templateFields, function (error, html) {
             if (error) {
-                console.log("Error sending email: " + error);
+                log("Error rendering email: " + error);
                 return;
             }
-            console.log("Email sent successfully.");
+            var mailoptions = {
+                to: meeting.organiser.email,
+                subject: "RE: " + meeting.subject,
+                generateTextFromHTML: true,
+                html: html,
+                inReplyTo: meeting.emailId,
+                references: meeting.emailId
+            };
+            smtpTransport.sendMail(mailoptions, function (error, result) {
+                if (error) {
+                    log("Error sending email: " + error);
+                }
+                log("Email sent succesfully: " + result.messageId);
+            });
         });
-        
     }
     return { send: send };
 }

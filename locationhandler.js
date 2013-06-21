@@ -1,4 +1,6 @@
-﻿function create(callback) {
+﻿var log = require("./log");
+
+function create(callback) {
     function handle(request, response) {
         if (request.method !== "POST") {
             response.send(405); // Method not Allowed

@@ -14,7 +14,7 @@
 	"node-schedule": "0.1.8",
 	"geo-distance-js": "0.0.2",
     "dateformat": "1.0.6-1.2.3",
-    "express-mailer": "0.2.0",
+    "nodemailer": "0.3.44",
     "icalendar": "0.6.3",
     "mapquest": "0.0.1",
     "mockery": "1.4.0",

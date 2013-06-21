@@ -1,5 +1,6 @@
-﻿
-function listen(imapConnection, newMessageCallback, debug) {
+﻿var log = require("./log")("imap");
+
+function listen(imapConnection, newMessageCallback) {
 	/// <summary>
     /// Initialises the IMAP server, and starts listening for new email.
     /// </summary>
@@ -33,14 +34,14 @@ function listen(imapConnection, newMessageCallback, debug) {
         // Handle any errors connecting. 
         // N.B: No need  to call logout, socket is immediately destroyed.
         if (error) {
-            log("[IMAP] An error occured connecting.");
+            log("An error occured connecting.");
 
             // Try to reconnect again.
             reconnect(true);
             return;
         }
 
-        log("[IMAP] Connected.");
+        log("Connected.");
 
         try {
             // Open the specified mailbox in non-read only mode.
@@ -60,7 +61,7 @@ function listen(imapConnection, newMessageCallback, debug) {
 
         // Handle any errors opening the mailbox.
         if (error) {
-            log("[IMAP] An error occured opening mailbox: " + error);
+            log("An error occured opening mailbox: " + error);
 
             // Try to reconnect again.
             reconnect(true);
@@ -95,7 +96,7 @@ function listen(imapConnection, newMessageCallback, debug) {
 
         // If there was an error.
         if (error) {
-            log("[IMAP] An error occured searching the mailbox for new mail.");
+            log("An error occured searching the mailbox for new mail.");
 
             // Try to reconnect again.
             reconnect(true);
@@ -106,7 +107,7 @@ function listen(imapConnection, newMessageCallback, debug) {
         var itemsFound = (results == null) ? 0 : results.length;
 
         // Report the number found
-        log("[IMAP] " + itemsFound.toString() + " items are available.");
+        log(itemsFound.toString() + " items are available.");
 
         // If there are no results
         if (itemsFound == 0) {
@@ -124,7 +125,7 @@ function listen(imapConnection, newMessageCallback, debug) {
             {
                 headers:
                   {
-                      fields: ["from", "to", "subject", "date"], // Alternatively, use 'true' to get all headers.
+                      fields: ["from", "to", "subject", "date", "message-id"], // Alternatively, use 'true' to get all headers.
                       parse: true
                   },
                 body: true,
@@ -139,7 +140,7 @@ function listen(imapConnection, newMessageCallback, debug) {
         /// </summary>
         /// <param name="fetchedMail">An ImapFetch object representing the fetched email.</param>
 
-        log("[IMAP] Items are being fetched.");
+        log("Items are being fetched.");
 
         // As each message is fetched.
         imapFetch.on("message", fetchingMessage);
@@ -157,11 +158,11 @@ function listen(imapConnection, newMessageCallback, debug) {
         }
 
         function finaliseMessage() {
-            log("[IMAP] Finished fetching message #" + message.seqno + ".");
+            log("Finished fetching message #" + message.seqno + ".");
             newMessageCallback(messageHeaders, messageBody);
         }
 
-        log("[IMAP] Message #" + message.seqno + " is being fetched.");
+        log("Message #" + message.seqno + " is being fetched.");
         message.on("headers", addMessageHeaders);
         message.on("data", addMessageData);
         message.on("end", finaliseMessage);
@@ -176,7 +177,7 @@ function listen(imapConnection, newMessageCallback, debug) {
 
         // If there was an error.
         if (error) {
-            log("[IMAP] An error occured retreiving messages.");
+            log("An error occured retreiving messages.");
 
             // Try to reconnect again.
             reconnect(true);
@@ -193,7 +194,7 @@ function listen(imapConnection, newMessageCallback, debug) {
         // If we aren't currently trying to reconnect.
         if (!busyConnecting && !reconnecting) {
 
-            log("[IMAP] Connection lost. Attempting reconnect in 5 seconds.");
+            log("Connection lost. Attempting reconnect in 5 seconds.");
 
             // Schedule to reconnect in 5 seconds.
             reconnecting = true;
@@ -215,7 +216,7 @@ function listen(imapConnection, newMessageCallback, debug) {
             // Do nothing.
             return;
 
-        log("[IMAP] Connecting...");
+        log("Connecting...");
 
         // Try to connect.
         busyConnecting = true;  // Save that we are currently in the process of connecting.
@@ -231,12 +232,7 @@ function listen(imapConnection, newMessageCallback, debug) {
 
         var reason = (error) ? "Expected log out." : error.toString();
 
-        log("[IMAP] Logged out. Reason: " + reason);
-    }
-
-    function log(message) {
-        if (debug)
-            console.log(message);
+        log("Logged out. Reason: " + reason);
     }
 }
 

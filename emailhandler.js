@@ -1,6 +1,8 @@
 ﻿
-var icalendar = require('icalendar')
-  , mapquest = require('mapquest');
+var icalendar = require("icalendar")
+  , mapquest = require("mapquest")
+  , log = require("./log");
+var inspect = require("util").inspect;
 
 function create(meetingCallback) {
     function emailHandler(headers, body) {
@@ -38,7 +40,7 @@ function create(meetingCallback) {
             var attendees = toPeople(properties.ATTENDEE);
             var subject = properties.SUMMARY[0].value;
             var description = properties.DESCRIPTION[0].value.trim();
-
+            var emailId = headers["message-id"];
             mapquest.geocode(location, function (error, result) {
                 if (error || result === undefined || result.latLng === undefined) {
                     meetingCallback(new Error('Could not geocode "' + location + '".'));
@@ -54,7 +56,8 @@ function create(meetingCallback) {
                     organiser: organiser,
                     attendees: attendees,
                     subject: subject,
-                    description: description
+                    description: description,
+                    emailId: emailId
                 };
 
                 meetingCallback(undefined, meeting);
@@ -70,7 +73,6 @@ function create(meetingCallback) {
             }
         }
         catch (error) {
-            console.log("Calendar parsing error. ");
             meetingCallback(error);
         }
     }

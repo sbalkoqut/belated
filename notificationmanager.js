@@ -2,14 +2,16 @@
 var meetingStore = require("./meetingstore");
 var locationStore = require("./locationstore");
 var distance = require("./distance");
+var log = require("./log")("noti");
 var notificationSender = require("./notificationsender");
 
-function start(app) {
+function start(app, debug) {
     var reminderMinutes = [0, 5, 15, 30, 60, 120];
     var mStore = meetingStore.create();
     var lStore = locationStore.create();
     var lastMeetingDate = new Date();
     var notification = notificationSender.create(app);
+    var couldMake = distance.initialise(debug);
 
     function scheduleNotifications(meeting) {
         var now = Date.now();
@@ -24,7 +26,7 @@ function start(app) {
                 });
             })(meeting, reminderMinutes[i]);
         }
-        console.log("[NOTIFICATIONS] scheduled for meeting organised by " + meeting.organiser.name + ".");
+        log("scheduled for meeting organised by " + meeting.organiser.name + ".");
     }
 
     function handleMeeting(meeting) {
@@ -41,7 +43,7 @@ function start(app) {
     }
 
     function process() {
-        console.log("[NOTIFICATIONS] Looking for upcoming meetings...");
+        log("Looking for upcoming meetings...");
         var soon = new Date();
         soon.setHours(soon.getHours() + 3);
 
@@ -59,7 +61,7 @@ function start(app) {
 
         function createPositionReport(person) {
             var position = lStore.getPosition(person.email);
-            var report = distance.couldMake(meeting, position);
+            var report = couldMake(meeting, position);
             report.person = person;
 
             if (report.late && !person.late) {
@@ -71,7 +73,7 @@ function start(app) {
             }
             positionReports.push(report);
         }
-        console.log("[NOTIFICATIONS] Checking location of participants " + minutes + " minutes ahead of meeting start.");
+        log("Checking location of participants " + minutes + " minutes ahead of meeting start.");
 
         if (meeting.organiser !== undefined) {
             createPositionReport(meeting.organiser);

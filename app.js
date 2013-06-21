@@ -13,13 +13,10 @@ var express = require('express')
   , emailHandler = require('./emailhandler')
   , locationHandler = require('./locationhandler')
   , inspect = require('util').inspect
-  , notifications = require('./notificationmanager')
-  , mailer = require("express-mailer");
+  , notifications = require('./notificationmanager');
 var config = require("./config.json");
 
 var app = express();
-
-mailer.extend(app, config.mailer);
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -84,7 +81,8 @@ notificationManager.handleMeeting({
         email: "patrick.meiring@gmail.com"
     }],
     subject: "Meeting Subject",
-    description: "Meeting body.\nFurther description..."
+    description: "Meeting body.\nFurther description...",
+    emailId: "<BLU401-EAS306CF3C721F073561649904888F0@phx.gbl>"
 });
 notificationManager.handleLocation({
     latitude: 1.9201,
