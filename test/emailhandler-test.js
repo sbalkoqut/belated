@@ -25,6 +25,7 @@ describe("emailHandler", function () {
             var emailhandler = require("../emailhandler");
             var email = fs.readFileSync("test/test-email-outlook-2010.txt", "utf8");
             var validMeeting = {
+                location: "Sydney",
                 latitude: 1.92,
                 longitude: 192.3,
                 start: new Date(Date.UTC(2013, 4, 23, 0, 30, 0, 0)),
@@ -38,7 +39,7 @@ describe("emailHandler", function () {
                     email: "johnny.smith@gmail.com"
                 }],
                 subject: "Meeting Subject",
-                description: "Meeting body.\n"
+                description: "Meeting body."
             };
             var handler = emailhandler.create(function (error, meeting) {
                 assert.strictEqual(error, undefined, "No error should occur.");
