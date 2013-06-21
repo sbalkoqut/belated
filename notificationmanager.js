@@ -2,13 +2,14 @@
 var meetingStore = require("./meetingstore");
 var locationStore = require("./locationstore");
 var distance = require("./distance");
-var notification = require("./notificationsender");
+var notificationSender = require("./notificationsender");
 
-function start() {
-    var reminderMinutes = [0, 5, 10, 30, 60, 120];
+function start(app) {
+    var reminderMinutes = [0, 5, 15, 30, 60, 120];
     var mStore = meetingStore.create();
     var lStore = locationStore.create();
     var lastMeetingDate = new Date();
+    var notification = notificationSender.create(app);
 
     function scheduleNotifications(meeting) {
         var now = Date.now();
@@ -53,19 +54,20 @@ function start() {
 
     function check(meeting, minutes) {
         var someoneNewLate = false;
-        var someoneCloseOrLate = false;
+        var allComfortablyOnTime = true;
         var positionReports = [];
 
         function createPositionReport(person) {
             var position = lStore.getPosition(person.email);
             var report = distance.couldMake(meeting, position);
+            report.person = person;
 
             if (report.late && !person.late) {
                 someoneNewLate = true;
                 person.late = true;
             }
-            if (report.close || report.late) {
-                someoneCloseOrLate = true;
+            if ((!report.comfortable) || report.late) {
+                allComfortablyOnTime = false;
             }
             positionReports.push(report);
         }
@@ -78,11 +80,11 @@ function start() {
         for (var i = 0; i < meeting.attendees.length; i++) {
             createPositionReport(meeting.attendees[i]);
         }
-
-        var sendUpdate = (minutes === 10);
+        
+        var sendUpdate = (minutes === 15);
         if (someoneNewLate)
             sendUpdate = true;
-        else if (someoneCloseOrLate && minutes < 10)
+        else if ((!allComfortablyOnTime) && minutes < 10)
             sendUpdate = true;
         if (sendUpdate)
             notification.send(meeting, positionReports);

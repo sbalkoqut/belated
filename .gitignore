@@ -13,6 +13,9 @@ lib-cov
 *.nodevsdbg
 Web*.config
 
+# Ignored for security reasons file includes passwords.
+config.json
+
 bin
 obj
 pids
