@@ -1,5 +1,6 @@
 ﻿var nodemock = require("nodemock");
 var assert = require("assert");
+var locationStorage = require("../locationstore");
 
 var samplePositions = [
         {
@@ -20,7 +21,7 @@ describe("locationStore", function () {
     describe("#setPosition", function () {
         var locationStore;
         beforeEach(function () {
-            locationStore = require("../locationstore").create();
+            locationStore = locationStorage.create();
         });
 
         function set(position) {
