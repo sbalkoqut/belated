@@ -37,14 +37,22 @@ function create(app) {
             }
             return introductoryText;
         }
+        function to() {
+            var result = [meeting.organiser.email];
+            for (var i = 0; i < meeting.attendees.length; i++) {
+                result.push(attendees.email);
+            }
+            return result;
+        }
         var start = dateFormat(meeting.start, "dddd mmmm d, yyyy h:MM tt");
 
         var end = sameDay(meeting.start, meeting.end) ? dateFormat(meeting.end, "h:MM tt")
                                                       : dateFormat(meeting.end, "dddd mmmm d, yyyy h:MM tt");
-
+        
         var description = meeting.description.replace(/\n/g, '<br>');
-
+        console.log(attendeeReports);
         var templateFields = {
+            attendees: attendeeReports,
             intro: introduction(),
             subject: meeting.subject,
             description: description,
@@ -52,16 +60,16 @@ function create(app) {
             end: end,
             latitude: meeting.latitude,
             longitude: meeting.longitude,
-            location: meeting.location,
-            attendees: attendeeReports
+            location: meeting.location
         };
         app.render("email", templateFields, function (error, html) {
             if (error) {
                 log("Error rendering email: " + error);
                 return;
             }
+
             var mailoptions = {
-                to: meeting.organiser.email,
+                to: to(),
                 subject: "RE: " + meeting.subject,
                 generateTextFromHTML: true,
                 html: html,
