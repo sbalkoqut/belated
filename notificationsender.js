@@ -50,7 +50,7 @@ function create(app) {
                                                       : dateFormat(meeting.end, "dddd mmmm d, yyyy h:MM tt");
         
         var description = meeting.description.replace(/\n/g, '<br>');
-        console.log(attendeeReports);
+
         var templateFields = {
             attendees: attendeeReports,
             intro: introduction(),

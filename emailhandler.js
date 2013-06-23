@@ -78,4 +78,4 @@ function create(meetingCallback) {
     }
     return emailHandler;
 }
-exports.create = create;
+exports = module.exports = create;

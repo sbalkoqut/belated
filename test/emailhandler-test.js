@@ -42,7 +42,7 @@ describe("emailHandler", function () {
                 description: "Meeting body.",
                 emailId: "<BLU501-EAS310DE2D852A184325678890876F1@gbm.phl>"
             };
-            var handler = emailhandler.create(function (error, meeting) {
+            var handler = emailhandler(function (error, meeting) {
                 assert.strictEqual(error, undefined, "No error should occur.");
                 assert.deepEqual(meeting, validMeeting, "Expected meeting to be parsed correctly.");
                 done();

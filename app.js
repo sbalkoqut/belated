@@ -55,7 +55,7 @@ app.all('/location', locationHandler.create(function(error, location)
 
 emailClient.listen(
     new imap(config.imap),
-    emailHandler.create(function (error, meeting) {
+    emailHandler(function (error, meeting) {
         if (error)
             console.log("A meeting was not added. " + error);
         else {
