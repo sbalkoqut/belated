@@ -11,7 +11,6 @@ function start(app, debug) {
     var lStore = locationStore.create();
     var lastMeetingDate = new Date();
     var notification = notificationSender.create(app);
-    var couldMake = distance.initialise(debug);
 
     function scheduleNotifications(meeting) {
         var now = Date.now();
@@ -61,7 +60,7 @@ function start(app, debug) {
 
         function createPositionReport(person) {
             var position = lStore.getPosition(person.email);
-            var report = couldMake(meeting, position);
+            var report = distance.couldMake(meeting, position);
             report.person = person;
 
             if (report.late && !person.late) {
@@ -85,8 +84,6 @@ function start(app, debug) {
         
         var sendUpdate = (minutes === 15);
         if (someoneNewLate)
-            sendUpdate = true;
-        else if ((!allComfortablyOnTime) && minutes < 10)
             sendUpdate = true;
         if (sendUpdate)
             notification.send(meeting, positionReports);
