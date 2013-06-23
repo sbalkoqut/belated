@@ -40,7 +40,7 @@ function create(app) {
         function to() {
             var result = [meeting.organiser.email];
             for (var i = 0; i < meeting.attendees.length; i++) {
-                result.push(attendees.email);
+                result.push(meeting.attendees[i].email);
             }
             return result;
         }
