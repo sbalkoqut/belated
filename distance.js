@@ -101,4 +101,4 @@ function rangeReport(minutesUntilMeeting, distance, slack) {
         canMake: canMake
     };
 }
-exports.couldMake = couldMake;
+exports = module.exports = couldMake;

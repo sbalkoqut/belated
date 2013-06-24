@@ -31,4 +31,4 @@ function create() {
         getPosition: getPosition
     }
 }
-exports.create = create;
+exports = module.exports = create;

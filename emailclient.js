@@ -236,5 +236,4 @@ function listen(imapConnection, newMessageCallback) {
     }
 }
 
-
-exports.listen = listen;
+exports = module.exports = listen;

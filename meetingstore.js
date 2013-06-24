@@ -62,4 +62,4 @@ function create() {
         getMeetingsWithin: getMeetingsWithin
     };
 }
-exports.create = create;
+exports = module.exports = create;

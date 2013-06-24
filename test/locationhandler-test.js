@@ -30,7 +30,7 @@ describe("locationHandler", function () {
             var startTime = Date.now();
             var callbackReceived = false;
 
-            handler = locationHandler.create(function (error, position) {
+            handler = locationHandler(function (error, position) {
                 var endTime = Date.now();
                 callbackReceived = true;
 
@@ -90,7 +90,7 @@ describe("locationHandler", function () {
 
     describe("#getPosition", function () {
         it("should return undefined when no position has been received", function () {
-            var locationStore = require("../locationstore").create();
+            var locationStore = require("../locationstore")();
             assert.strictEqual(locationStore.getPosition("john@gmail.com"), undefined);
         });
     });

@@ -87,4 +87,4 @@ function create(app) {
     return { send: send };
 }
 
-exports.create = create;
+exports = module.exports = create;

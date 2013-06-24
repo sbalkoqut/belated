@@ -5,6 +5,7 @@ describe("meetingStore", function () {
     var store;
     // Sorted list of meetings by start time.
     var meetings = [{
+        location: "Brisbane, Australia",
         latitude: 1.92,
         longitude: 192.3,
         start: new Date(Date.UTC(2013, 4, 23, 0, 30, 0, 0)),
@@ -18,8 +19,10 @@ describe("meetingStore", function () {
             email: "johnny.smith@gmail.com"
         }],
         subject: "Meeting Subject",
-        description: "Meeting body.\n"
+        description: "Meeting body.\n",
+        emailId: "<BLU401-EAS404DE843EABFACD74383473288F1@phx.gbl>"
     }, {
+        location: "Sydney, Australia",
         latitude: -81.3,
         longitude: -50.1,
         start: new Date(Date.UTC(2013, 5, 23, 10, 30, 0, 0)),
@@ -33,14 +36,13 @@ describe("meetingStore", function () {
             email: "wolfgang.apfelbaum@web.de"
         }],
         subject: "Picnic",
-        description: "Formal invitation to a casual picnic with dog.\n"
-    }
+        description: "Formal invitation to a casual picnic with dog.\n",
+        emailId: "<BLU401-EAS404DE843EABFACD74383473288F0@phx.gbl>"
+    }];
 
-
-    ]
     describe("#add", function () {
         beforeEach(function () {
-            store = meetingStore.create();
+            store = meetingStore();
         });
 
         it("should add meetings successfully, and let them be accessible via #getMeetingsWithin", function () {
@@ -84,7 +86,7 @@ describe("meetingStore", function () {
 
     describe("#getMeetingsWithin", function () {
         beforeEach(function () {
-            store = meetingStore.create();
+            store = meetingStore();
         });
         it("should return an empty array of meetings for any valid timespan when none have been added", function () {
            

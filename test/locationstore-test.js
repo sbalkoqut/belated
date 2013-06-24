@@ -21,7 +21,7 @@ describe("locationStore", function () {
     describe("#setPosition", function () {
         var locationStore;
         beforeEach(function () {
-            locationStore = locationStorage.create();
+            locationStore = locationStorage();
         });
 
         function set(position) {
@@ -71,7 +71,7 @@ describe("locationStore", function () {
 
     describe("#getPosition", function () {
         it("should return undefined when no position has been received", function () {
-            var locationStore = require("../locationstore").create();
+            var locationStore = locationStorage();
             assert.strictEqual(locationStore.getPosition("john@gmail.com"), undefined);
         });
     });

@@ -1,7 +1,13 @@
 var emailClient = require("../emailclient"); // Load Node Assert module
 var assert = require("assert");
-
+var log = require("../log")
 describe('emailClient', function () {
+    before(function () {
+        log.enabled = false;
+    });
+    after(function () {
+        log.enabled = true;
+    });
 
     describe('#listen()', function () {
 
@@ -177,7 +183,7 @@ describe('emailClient', function () {
 
             sendEmail([142, 182, 1232]);
 
-            emailClient.listen(imapConnection, function (headers, body) {
+            emailClient(imapConnection, function (headers, body) {
                 receivedEmail(headers, body);
                 if (hasReceivedAllEmail())
                     done();
@@ -186,7 +192,7 @@ describe('emailClient', function () {
         })
         it('should notify about new emails upon arrival', function (done) {
 
-            emailClient.listen(imapConnection, function (headers, body) {
+            emailClient(imapConnection, function (headers, body) {
                 assert(emailSentCount > 0, "A call was made to the new email callback when there was no actual email available.");
 
                 receivedEmail(headers, body);

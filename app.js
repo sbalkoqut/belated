@@ -39,9 +39,9 @@ if ('development' == app.get('env')) {
 app.get('/', routes.index);
 app.get('/users', user.list);
 
-var notificationManager = notifications.start(app);
+var notificationManager = notifications(app);
 
-app.all('/location', locationHandler.create(function(error, location)
+app.all('/location', locationHandler(function(error, location)
 {
     if (error)
         console.log("[LOCATION] An update failed. " + error);
@@ -53,7 +53,7 @@ app.all('/location', locationHandler.create(function(error, location)
 }));
 
 
-emailClient.listen(
+emailClient(
     new imap(config.imap),
     emailHandler(function (error, meeting) {
         if (error)

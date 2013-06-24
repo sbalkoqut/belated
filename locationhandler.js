@@ -36,4 +36,4 @@ function create(callback) {
     }
     return handle;
 }
-exports.create = create;
+exports = module.exports = create;
