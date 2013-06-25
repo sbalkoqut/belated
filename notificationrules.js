@@ -1,11 +1,10 @@
-﻿
-var notificationSender = require("./notificationsender");
+﻿var notificationSender = require("./notificationsender");
 var log = require("./log")("rule");
 var distance = require("./distance");
 
 function create(app, locationStore) {
-
     var notification = notificationSender(app);
+
     function runLogic(meeting, minutes) {
         var someoneNewLate = false;
         var allComfortablyOnTime = true;
@@ -23,16 +22,16 @@ function create(app, locationStore) {
             if ((!report.comfortable) || report.late) {
                 allComfortablyOnTime = false;
             }
-            positionReports.push(report);
+            return report;
         }
         log("Checking location of participants " + minutes + " minutes ahead of meeting start.");
 
         if (meeting.organiser !== undefined) {
-            createPositionReport(meeting.organiser);
+            positionReports.push(createPositionReport(meeting.organiser));
         }
 
         for (var i = 0; i < meeting.attendees.length; i++) {
-            createPositionReport(meeting.attendees[i]);
+            positionReports.push(createPositionReport(meeting.attendees[i]));
         }
 
         var sendUpdate = (minutes === 15);

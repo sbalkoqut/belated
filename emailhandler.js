@@ -4,8 +4,22 @@ var icalendar = require("icalendar")
   , log = require("./log");
 var inspect = require("util").inspect;
 
+var serviceEmail = "calqut@gmail.com";
+
 function create(meetingCallback) {
     function emailHandler(headers, body) {
+        try {
+            var calendar = icalendar.parse_calendar(body.trim() + "\r\n");
+            var events = calendar.events();
+
+            for (var i = 0; i < events.length; i++) {
+                event(events[i]);
+            }
+        }
+        catch (error) {
+            meetingCallback(error);
+        }
+
         function event(event) {
             function toPerson(contact) {
                 var email = contact.value;
@@ -25,7 +39,7 @@ function create(meetingCallback) {
                 var people = [];
                 for (var i = 0; i < contacts.length; i++) {
                     var person = toPerson(contacts[i]);
-                    if (person.email.toLowerCase() !== "calqut@gmail.com") {
+                    if (person.email.toLowerCase() !== serviceEmail) {
                         people.push(person);
                     }
                 }
@@ -62,18 +76,6 @@ function create(meetingCallback) {
 
                 meetingCallback(undefined, meeting);
             });
-        }
-
-        try {
-            var calendar = icalendar.parse_calendar(body.trim() + "\r\n");
-            var events = calendar.events();
-
-            for (var i = 0; i < events.length; i++) {
-                event(events[i]);
-            }
-        }
-        catch (error) {
-            meetingCallback(error);
         }
     }
     return emailHandler;

@@ -20,7 +20,6 @@ function create(callback) {
         var longitude = parseFloat(request.body.lng);
 
         if (isNaN(latitude) || isNaN(longitude) || email.length < "a@a.eu".length) {
-
             response.send(400);
             callback(new Error("Invalid request data."));
             return;
