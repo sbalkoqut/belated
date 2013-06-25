@@ -1,4 +1,5 @@
-﻿
+﻿var log = require("./log")("msto");
+
 function create() {
     var allMeetings = [];
 
@@ -57,9 +58,23 @@ function create() {
         }
         return result;
     }
+
+    function remove(meeting) {
+        for (var i = 0; i < allMeetings.length; i++) {
+            var currentMeeting = allMeetings[i];
+            if (currentMeeting == meeting) {
+                allMeetings.splice(i, 1);
+                return true;
+            }
+        }
+        log("A meeting removal failed!");
+        return false;
+    }
+
     return {
         add: add,
-        getMeetingsWithin: getMeetingsWithin
+        getMeetingsWithin: getMeetingsWithin,
+        remove: remove
     };
 }
 exports = module.exports = create;

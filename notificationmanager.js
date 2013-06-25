@@ -13,6 +13,8 @@ function start(app, debug) {
 
     function scheduleNotifications(meeting) {
         var now = Date.now();
+        var scheduled = false;
+
         for (var i = 0; i < reminderMinutes.length; i++) {
             var reminderTime = meeting.start.getTime() - (reminderMinutes[i] * 60 * 1000);
             if (reminderTime <= now)
@@ -24,10 +26,20 @@ function start(app, debug) {
 
                 scheduler.scheduleJob(scheduledDate, function () {
                     notificationLogic(meeting, minutes);
+                    if (minutes === 0) {
+                        log("Removing a meeting that just started.");
+                        mStore.remove(meeting);
+                    }
                 });
             })(meeting, reminderMinutes[i]);
+            scheduled = true;
         }
-        log("scheduled for meeting organised by " + meeting.organiser.name + ".");
+        if (!scheduled) {
+            mStore.remove(meeting);
+            log("Could not schedule meeting organised by " + meeting.organiser.name + " (already occurred).");
+        }
+        else
+            log("Scheduled for meeting organised by " + meeting.organiser.name + ".");
     }
 
     function handleMeeting(meeting) {

@@ -45,12 +45,16 @@ describe("meetingStore", function () {
             store = meetingStore();
         });
 
-        it("should add meetings successfully, and let them be accessible via #getMeetingsWithin", function () {
+        it("should add and delete a meeting successfully", function () {
             var meeting = meetings[0];
             store.add(meeting);
 
             var result = store.getMeetingsWithin(meeting.start, meeting.start);
             assert.deepEqual(result, [meeting], "the meeting should be accessible via #getMeetingsWithin");
+
+            store.remove(meeting);
+            result = store.getMeetingsWithin(meeting.start, meeting.start);
+            assert.deepEqual(result, [], "the meeting should no longer be accessible via #getMeetingsWithin after deletion");
         });
       
         it("should add multiple meetings successfully", function () {
@@ -63,6 +67,15 @@ describe("meetingStore", function () {
             }
             var all = store.getMeetingsWithin(meetings[0].start, meetings[meetings.length-1].start);
             assert.deepEqual(all, meetings, "all meetings should be accessible in order via #getMeetingsWithin");
+
+            for (var i = 0; i < meetings.length; i++) {
+                store.remove(meetings[i]);
+
+                var result = store.getMeetingsWithin(meetings[i].start, meetings[i].start);
+                assert.deepEqual(result, [], "the meeting should not be accessible via #getMeetingsWithin");
+            }
+            all = store.getMeetingsWithin(meetings[0].start, meetings[meetings.length - 1].start);
+            assert.deepEqual(all, [], "all meetings should no longer be accessible in order via #getMeetingsWithin");
 
         });
         it("should add multiple meetings successfully", function () {

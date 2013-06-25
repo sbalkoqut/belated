@@ -19,8 +19,6 @@ describe("notificationmanager", function () {
     beforeEach(function () {
         app = { "Mock instance of Type": "App" };
 
-        meetingsWithin = [];
-
         scheduler = nodemock.mock("RecurrenceRule").returns({ "Mock instance of Type": "RecurrenceRule" });
         scheduler.mock("scheduleJob").takes({ "Mock instance of Type": "RecurrenceRule", minute: [1, 31] }, function () { });
     });
@@ -51,6 +49,7 @@ describe("notificationmanager", function () {
             }
             meetingStore.getMeetingsWithin.count = 0;
         }
+        meetingsWithin = meetingsWithin || [];
 
         extendMeetingStore();
 
@@ -80,10 +79,11 @@ describe("notificationmanager", function () {
     afterEach(function () {
         rules = undefined;
         locationStore = undefined;
+        meetingStorage = undefined;
         meetingStore = undefined;
         rulesModule = undefined;
         locationStorage = undefined;
-        meetingStorage = undefined;
+        meetingsWithin = undefined;
         mockery.deregisterAll();
         mockery.disable();
     });
@@ -159,7 +159,8 @@ describe("notificationmanager", function () {
             emailId: "<BLU401-EAS404DE843EABFACD74383473288F2@phx.gbl>"
         };
         meetingStore = nodemock.mock("add").takes(meeting);
-        
+        meetingStore.mock("remove").takes(meeting).returns(true);
+
         var rulesMock = nodemock;
 
         var minutesBefore = [0, 5, 15, 30];
@@ -210,6 +211,7 @@ describe("notificationmanager", function () {
             }];
 
         var rulesMock = nodemock;
+        meetingStore = nodemock;
 
         var minutesBefore = [0, 5, 15, 30, 60, 120];
         for (var m = 0; m < meetingsWithin.length; m++) {
@@ -219,6 +221,7 @@ describe("notificationmanager", function () {
                 scheduler.mock("scheduleJob").takes(scheduleDate, function () { }).calls(1);
                 rulesMock = rulesMock.mock("runLogic").takes(meetingsWithin[m], minutesBefore[i]);
             }
+            meetingStore = meetingStore.mock("remove").takes(meetingsWithin[m]).returns(true);
         }
 
         rules = rulesMock.runLogic;
@@ -227,6 +230,7 @@ describe("notificationmanager", function () {
 
         endTest();
         rulesMock.assertThrows();
+        meetingStore.assertThrows();
         assert.strictEqual(meetingStore.getMeetingsWithin.count, 2, "#getMeetingsWithin() should only be called once at the start, and once per periodic processing loop.");
 
     });
