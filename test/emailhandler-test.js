@@ -49,7 +49,7 @@ describe("emailHandler", function () {
                 done();
             });
             
-            handler({ "message-id": "<BLU501-EAS310DE2D852A184325678890876F1@gbm.phl>"}, email);
+            handler({ "message-id": ["<BLU501-EAS310DE2D852A184325678890876F1@gbm.phl>"]}, email);
 
             mockery.deregisterMock("mapquest");
         });

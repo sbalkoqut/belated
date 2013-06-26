@@ -54,7 +54,7 @@ function create(meetingCallback) {
             var attendees = toPeople(properties.ATTENDEE);
             var subject = properties.SUMMARY[0].value;
             var description = properties.DESCRIPTION[0].value.trim();
-            var emailId = headers["message-id"];
+            var emailId = headers["message-id"][0];
             mapquest.geocode(location, function (error, result) {
                 if (error || result === undefined || result.latLng === undefined) {
                     meetingCallback(new Error('Could not geocode "' + location + '".'));
