@@ -1,0 +1,30 @@
+!!! Strict
+html
+  head
+    style(type="text/css").
+      body { font: 13px Arial, sans-serif; color: #222; } .subtle { color: #888; vertical-align: top; width: 70px; } h2 { font-size: 16px; } ul { margin:0px 0px 0px 26px; padding-left:0px; } .small { font-size: 10px; } }
+  body
+    p 
+      em #{intro} 
+    h2 #{subject}
+    p !{description}
+    table
+      tr
+        td(class="subtle") When
+        td #{start} - #{end}
+      tr
+        td(class="subtle") Where
+        td #{location} (
+          a(href="http://maps.google.com/?q=#{latitude},#{longitude}") map
+          | )
+      tr
+        td(class="subtle") Who
+        td
+          ul
+            each attendee in attendees
+              li 
+                a(href="mailto:#{attendee.person.email}") #{attendee.person.name}
+                - if(!attendee.comfortable)
+                  strong #{attendee.message}
+                - else
+                  | #{attendee.message}
