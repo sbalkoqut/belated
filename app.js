@@ -65,38 +65,19 @@ emailClient(
     }),
     true);
 
-// Debug only.
-notificationManager.handleMeeting({
-    location: "Sydney, Australia",
-    latitude: 1.92,
-    longitude: 122.3,
-    start: new Date(Date.now() + 15.03 * 60000),
-    end: new Date(Date.now() + 45.03 * 60000),
-    organiser: {
-        name: "Patrick M",
-        email: "patrick.meiring@live.com"
-    },
-    attendees: [{
-        name: "Patrick Meiring",
-        email: "patrick.meiring@gmail.com"
-    }],
-    subject: "Meeting Subject",
-    description: "Meeting body.\nFurther description...",
-    emailId: "<BLU401-EAS306CF3C721F073561649904888F0@phx.gbl>"
+var httpServer = http.createServer(app);
+httpServer.on("error", function (error) {
+    console.log();
+    if (error.code == "EADDRINUSE") {
+        console.log("[ERROR] Couldn't start HTTP server: The port in use.");
+    }
+    else {
+        console.log("[ERROR] Problem with HTTP server:");
+        console.log(error);
+    }
+    console.log();
+    process.exit(1);
 });
-notificationManager.handleLocation({
-    latitude: 1.9201,
-    longitude: 122.3001,
-    email: "patrick.meiring@gmail.com",
-    lastUpdate: new Date(Date.now() - 60000)
-});
-notificationManager.handleLocation({
-    latitude: 1.951,
-    longitude: 122.249,
-    email: "patrick.meiring@live.com",
-    lastUpdate: new Date(Date.now() - 240000)
-});
-
-http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+httpServer.listen(app.get('port'), function(){
+    console.log('[HTTP] Express server listening on port ' + app.get('port'));
 });
