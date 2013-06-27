@@ -1,0 +1,3 @@
+[submodule "node-icalendar"]
+	path = node-icalendar
+	url = https://github.com/tritech/node-icalendar.git
