@@ -1,7 +1,3 @@
-
-
-
-
 var loadConfiguration = require('./config');
 
 loadConfiguration(
