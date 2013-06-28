@@ -10,7 +10,7 @@ var comfortableMinsEarly = 5;
 var dateFormat = require("dateformat");
 function couldMake(meeting, position) {
     if (position === undefined)
-        return { late: false, comfortable: true, message: "Not using Belated app." };
+        return { late: false, comfortable: true, message: " - Not using Belated app." };
 
     var distanceInMeters = geoDistance.getDistance(meeting.latitude, meeting.longitude, position.latitude, position.longitude);
 
@@ -23,7 +23,7 @@ function couldMake(meeting, position) {
 
     if (atUpdateMinutesUntilMeeting > 30) {
         log("The assessment made was that the last position update was too long ago for a judgement.");
-        return { late: false, comfortable: false, message: "No position updates received within the last 30 minutes." };
+        return { late: false, comfortable: false, message: " - No position updates received within the last 30 minutes." };
     }
 
     var usingMaxRange = rangeReport(atUpdateMinutesUntilMeeting, distanceInMeters);
