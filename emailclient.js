@@ -147,12 +147,6 @@ function listen(imapConnection, newMessageCallback) {
     function fetchingMessage(message) {
         var mailparser = new MailParser({streamAttachments: false });
 
-        var messageHeaders;
-        var messageBody = "";
-
-        function addMessageHeaders(headers) {
-            messageHeaders = headers;
-        }
         function addMessageData(chunk) {
             mailparser.write(chunk);
         }
@@ -164,13 +158,10 @@ function listen(imapConnection, newMessageCallback) {
 
         log("Message #" + message.seqno + " is being fetched.");
         mailparser.on("end", function (mail) {
-            console.log(inspect(mail));
             newMessageCallback(mail);
         });
-        message.on("headers", addMessageHeaders);
         message.on("data", addMessageData);
         message.on("end", finaliseMessage);
-
     }
 
 
