@@ -57,7 +57,7 @@ function create(meetingCallback) {
             }
 
             var properties = events[i].properties;
-            var location = properties.LOCATION[0].value;
+            var location = properties.LOCATION ?  properties.LOCATION[0].value : "";
             var startDate = properties.DTSTART[0].value;
             var endDate = properties.DTEND[0].value;
             var organiser = toPerson(properties.ORGANIZER[0]);
@@ -65,6 +65,11 @@ function create(meetingCallback) {
             var subject = properties.SUMMARY ? properties.SUMMARY[0].value : "";
             var description = properties.DESCRIPTION ? properties.DESCRIPTION[0].value.trim() : "";
             var emailId = mail.messageId;
+
+            if (!location || location.length === 0) {
+                meetingCallback(new Error("No location specified in meeting."));
+                return;
+            }
 
             geocoder(location, function (error, result) {
                 if (error) {
