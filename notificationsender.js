@@ -1,7 +1,7 @@
 ﻿var inspect = require("util").inspect;
 var dateFormat = require("dateformat");
 var nodemailer = require("nodemailer");
-var config = require("./config.json").notificationsender;
+var config = require("./config")().notificationsender;
 var log = require("./log")("smtp");
 
 function create(app) {

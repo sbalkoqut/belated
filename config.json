@@ -1,16 +1,4 @@
 {
-    "notificationsender": {
-        "service": "Gmail",
-        "auth": {
-            "user": "calqut@gmail.com",
-            "pass": ""
-        }
-    },
-    "imap": {
-        "user": "calqut@gmail.com",
-        "password": "",
-        "host": "imap.gmail.com",
-        "port": 993,
-        "secure": true
-    }
+    "gmail": "calqut@gmail.com",
+    "password": ""
 }

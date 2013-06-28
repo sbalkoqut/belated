@@ -3,7 +3,7 @@
   , log = require("./log");
 var inspect = require("util").inspect;
 
-var serviceEmail = "calqut@gmail.com";
+var serviceEmail = require("./config")().email;
 
 function create(meetingCallback) {
     function emailHandler(mail) {
@@ -63,8 +63,8 @@ function create(meetingCallback) {
             var endDate = properties.DTEND[0].value;
             var organiser = toPerson(properties.ORGANIZER[0]);
             var attendees = toPeople(properties.ATTENDEE);
-            var subject = properties.SUMMARY[0].value;
-            var description = properties.DESCRIPTION[0].value.trim();
+            var subject = properties.SUMMARY ? properties.SUMMARY[0].value : "";
+            var description = properties.DESCRIPTION ? properties.DESCRIPTION[0].value.trim() : "";
             var emailId = mail.messageId;
             mapquest.geocode(location, function (error, result) {
                 if (error || result === undefined || result.latLng === undefined) {
