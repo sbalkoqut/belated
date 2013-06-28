@@ -1,10 +1,58 @@
 ﻿var fs = require("fs");
 var readline = require("readline");
-
+var log = require("./log")("CONF");
 var config;
 
-function loadConfiguration(onload) {
-    if (onload === undefined || onload === null)
+function loadConfiguration(loaded) {
+    function getEmail(callback) {
+        if (isEmpty(configuration.gmail)) {
+            readinterface.question("Specify gmail account to use (e.g. \"calqut@gmail.com\"): ", function (answer) {
+                configuration.gmail = answer;
+                callback();
+            })
+        }
+        else
+            callback();
+    }
+
+    function getPassword(callback) {
+        if (isEmpty(configuration.password)) {
+            readinterface.question("Specify password to use: ", function (answer) {
+                configuration.password = answer;
+                callback();
+            })
+        }
+        else
+            callback();
+    }
+
+    function getBingKey(callback) {
+        if (isEmpty(configuration.bingkey)) {
+            readinterface.question("Specify Bing API Key to use: ", function (answer) {
+                configuration.bingkey = answer;
+                callback();
+            })
+        }
+        else
+            callback();
+    }
+
+    function isEmpty(string) {
+        return (string === undefined) || (string === null) || (typeof string !== "string") || (string.length === 0);
+    }
+
+    function onload() {
+        template.notificationsender.auth.user = configuration.gmail;
+        template.notificationsender.auth.pass = configuration.password;
+        template.imap.user = configuration.gmail;
+        template.imap.password = configuration.password;
+        template.email = configuration.gmail;
+        template.bingkey = configuration.bingkey;
+        config = template;
+        loaded(config);
+    }
+
+    if (loaded === undefined || loaded === null)
         return config;
     if (config)
         onload(config);
@@ -24,7 +72,8 @@ function loadConfiguration(onload) {
             port: 993,
             secure: true
         },
-        email: undefined
+        email: undefined,
+        bingkey: undefined
     };
 
     var configuration = {};
@@ -34,51 +83,43 @@ function loadConfiguration(onload) {
         configuration = JSON.parse(data);
     }
     catch (error) {
-        console.log("Couldn't read configuration file. " + error);
-        throw error;
+        log("Couldn't read configuration file. " + error);
     }
 
-    if (configuration.gmail === undefined || configuration.pass === undefined) {
+    
+
+
+    if (isEmpty(configuration.gmail) || isEmpty(configuration.password) || isEmpty(configuration.bingkey)) {
 
         var readinterface = readline.createInterface({
             input: process.stdin,
             output: process.stdout
         });
 
-        function getEmail(callback) {
-            if (!configuration.gmail) {
-                readinterface.question("Specify gmail account to use (e.g. \"calqut@gmail.com\"): ", function (answer) {
-                    configuration.gmail = answer;
-                    callback();
-                })
-            }
-            else
-                callback();
-        }
-        function getPassword(callback) {
-            if (!configuration.password || configuration.password.length === 0) {
-                readinterface.question("Specify password to use: ", function (answer) {
-                    configuration.password = answer;
-                    callback();
-                })
-            }
-            else
-                callback();
-        }
+
 
         getEmail(function () {
             getPassword(function () {
-                readinterface.close();
+                getBingKey(function () {
 
-                template.notificationsender.auth.user = configuration.gmail;
-                template.notificationsender.auth.pass = configuration.password;
-                template.imap.user = configuration.gmail;
-                template.imap.password = configuration.password;
-                template.email = configuration.gmail;
-                config = template;
-                onload(config);
+                    readinterface.close();
+                    try {
+                        var data = JSON.stringify(configuration);
+                        fs.writeFileSync("config.json", data);
+                        log("Configuration saved to config.json.");
+                    }
+                    catch (error) {
+                        log("Couldn't write configuration file. " + error);
+                    }
+
+                    onload();
+                });
             });
         });
+    }
+    else {
+        log("Configuration loaded.");
+        onload();
     }
 }
 
