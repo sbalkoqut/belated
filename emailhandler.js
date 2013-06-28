@@ -16,7 +16,7 @@ function create(meetingCallback) {
                 var attachment = mail.attachments[a];
                 if (attachment.contentType == "text/calendar") {
                     var body = attachment.content.toString("utf8");
-                    var calendar = icalendar.parse_calendar(body.trim() + "\r\n");
+                    var calendar = icalendar.parse_calendar(body);
                     var events = calendar.events();
 
                     for (var i = 0; i < events.length; i++) {
