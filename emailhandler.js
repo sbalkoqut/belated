@@ -1,6 +1,6 @@
 ﻿var icalendar = require("icalendar")
-  , mapquest = require("mapquest")
-  , log = require("./log");
+  , geocoder = require("./geocoder")
+  , log = require("./log")("hand");
 var inspect = require("util").inspect;
 
 var serviceEmail = require("./config")().email;
@@ -28,7 +28,6 @@ function create(meetingCallback) {
         }
         catch (error) {
             meetingCallback(error);
-            throw error;
         }
 
         function event(event) {
@@ -66,16 +65,16 @@ function create(meetingCallback) {
             var subject = properties.SUMMARY ? properties.SUMMARY[0].value : "";
             var description = properties.DESCRIPTION ? properties.DESCRIPTION[0].value.trim() : "";
             var emailId = mail.messageId;
-            mapquest.geocode(location, function (error, result) {
-                if (error || result === undefined || result.latLng === undefined) {
-                    meetingCallback(new Error('Could not geocode "' + location + '".'));
+
+            geocoder(location, function (error, result) {
+                if (error) {
+                    meetingCallback(error);
                     return;
                 }
-
                 var meeting = {
                     location: location,
-                    latitude: result.latLng.lat,
-                    longitude: result.latLng.lng,
+                    latitude: result.latitude,
+                    longitude: result.longitude,
                     start: startDate,
                     end: endDate,
                     organiser: organiser,
