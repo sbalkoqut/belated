@@ -19,7 +19,7 @@ function geocode(location, callback) {
     });
     var request = http.get(url, function (response) {
         if (response.statusCode != 200)
-            callback(new Error("Status code was " + result.statusCode));
+            callback(new Error("Status code was " + response.statusCode));
 
         var data = "";
         response.setEncoding("utf8");
