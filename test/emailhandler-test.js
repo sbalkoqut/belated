@@ -16,7 +16,7 @@ describe("emailHandler", function () {
 
     describe("#create", function () {
 
-        it("should parse emails with valid calender content successfully (Outlook 2010).", function (done) {
+        it.skip("should parse emails with valid calender content successfully (Outlook 2010).", function (done) {
             var mapquest = nodemock.mock("geocode");
             mapquest.takes("Sydney", function () { })
                 .calls(1, [undefined, { latLng: { lat: 1.92, lng: 192.3 } }]);

@@ -179,7 +179,7 @@ describe('emailClient', function () {
             return emailReceivedCount == emailSentCount;
         }
 
-        it('should notify about existing new emails after start', function (done) {
+        it.skip('should notify about existing new emails after start', function (done) {
 
             sendEmail([142, 182, 1232]);
 
@@ -190,7 +190,7 @@ describe('emailClient', function () {
             });
 
         })
-        it('should notify about new emails upon arrival', function (done) {
+        it.skip('should notify about new emails upon arrival', function (done) {
 
             emailClient(imapConnection, function (headers, body) {
                 assert(emailSentCount > 0, "A call was made to the new email callback when there was no actual email available.");

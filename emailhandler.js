@@ -1,5 +1,4 @@
-﻿
-var icalendar = require("icalendar")
+﻿var icalendar = require("icalendar")
   , mapquest = require("mapquest")
   , log = require("./log");
 var inspect = require("util").inspect;
@@ -7,17 +6,29 @@ var inspect = require("util").inspect;
 var serviceEmail = "calqut@gmail.com";
 
 function create(meetingCallback) {
-    function emailHandler(headers, body) {
+    function emailHandler(mail) {
         try {
-            var calendar = icalendar.parse_calendar(body.trim() + "\r\n");
-            var events = calendar.events();
-
-            for (var i = 0; i < events.length; i++) {
-                event(events[i]);
+            if (!mail.attachments || mail.attachments.length == 0) {
+                meetingCallback(new Error("Message didn't have any meeting attachments."));
+                return;
             }
+            for (var a = 0; a < mail.attachments.length; a++) {
+                var attachment = mail.attachments[a];
+                if (attachment.contentType == "text/calendar") {
+                    var body = attachment.content.toString("utf8");
+                    var calendar = icalendar.parse_calendar(body.trim() + "\r\n");
+                    var events = calendar.events();
+
+                    for (var i = 0; i < events.length; i++) {
+                        event(events[i]);
+                    }
+                }
+            }
+           
         }
         catch (error) {
             meetingCallback(error);
+            throw error;
         }
 
         function event(event) {
@@ -54,7 +65,7 @@ function create(meetingCallback) {
             var attendees = toPeople(properties.ATTENDEE);
             var subject = properties.SUMMARY[0].value;
             var description = properties.DESCRIPTION[0].value.trim();
-            var emailId = headers["message-id"][0];
+            var emailId = mail.messageId;
             mapquest.geocode(location, function (error, result) {
                 if (error || result === undefined || result.latLng === undefined) {
                     meetingCallback(new Error('Could not geocode "' + location + '".'));

@@ -1,4 +1,6 @@
 ﻿var log = require("./log")("imap");
+var MailParser = require("mailparser").MailParser;
+var inspect = require("util").inspect;
 
 function listen(imapConnection, newMessageCallback) {
 	/// <summary>
@@ -123,11 +125,7 @@ function listen(imapConnection, newMessageCallback) {
                 size: false
             },
             {
-                headers:
-                  {
-                      fields: ["from", "to", "subject", "date", "message-id"], // Alternatively, use 'true' to get all headers.
-                      parse: true
-                  },
+                headers: { parse: false }, // Get full raw message
                 body: true,
                 cb: onFetchingMessages
             },
@@ -147,6 +145,8 @@ function listen(imapConnection, newMessageCallback) {
     }
 
     function fetchingMessage(message) {
+        var mailparser = new MailParser({streamAttachments: false });
+
         var messageHeaders;
         var messageBody = "";
 
@@ -154,18 +154,23 @@ function listen(imapConnection, newMessageCallback) {
             messageHeaders = headers;
         }
         function addMessageData(chunk) {
-            messageBody += chunk;
+            mailparser.write(chunk);
         }
 
         function finaliseMessage() {
             log("Finished fetching message #" + message.seqno + ".");
-            newMessageCallback(messageHeaders, messageBody);
+            mailparser.end();
         }
 
         log("Message #" + message.seqno + " is being fetched.");
+        mailparser.on("end", function (mail) {
+            console.log(inspect(mail));
+            newMessageCallback(mail);
+        });
         message.on("headers", addMessageHeaders);
         message.on("data", addMessageData);
         message.on("end", finaliseMessage);
+
     }
 
 
