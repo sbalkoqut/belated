@@ -44,10 +44,18 @@ function create(app) {
             }
             return result;
         }
-        var start = dateFormat(meeting.start, "dddd mmmm d, yyyy h:MM tt");
 
-        var end = sameDay(meeting.start, meeting.end) ? dateFormat(meeting.end, "h:MM tt")
-                                                      : dateFormat(meeting.end, "dddd mmmm d, yyyy h:MM tt");
+
+        var brisbaneOffset = 600 - (new Date().getTimezoneOffset()); // The number of minutes that must be added to timestamps to get GMT+10 time
+        brisbaneOffset = brisbaneOffset * 60 * 1000;
+
+        var startDate = new Date(meeting.start.getTime() + brisbaneOffset);
+        var endDate = new Date(meeting.end.getTime() + brisbaneOffset);
+
+        var start = dateFormat(startDate, "dddd mmmm d, yyyy h:MM tt");
+
+        var end = sameDay(startDate, endDate) ? dateFormat(endDate, "h:MM tt")
+                                                      : dateFormat(endDate, "dddd mmmm d, yyyy h:MM tt");
         
         var description = meeting.description.replace(/\n/g, '<br>');
 
