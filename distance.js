@@ -14,6 +14,7 @@ function couldMake(meeting, position) {
 
     var distanceInMeters = geoDistance.getDistance(meeting.latitude, meeting.longitude, position.latitude, position.longitude);
 
+    var minutesSinceUpdate = (Date.now() - position.lastUpdate.getTime()) / 60000;
     var atUpdateMinutesUntilMeeting = (meeting.start.getTime() - position.lastUpdate.getTime()) / 60000;
     var currentMinutesUntilMeeting = (meeting.start.getTime() - Date.now()) / 60000;
 
@@ -21,7 +22,7 @@ function couldMake(meeting, position) {
     locationString += " km away at " + dateFormat(position.lastUpdate, "h:MM tt");
 
 
-    if (atUpdateMinutesUntilMeeting > 30) {
+    if (minutesSinceUpdate > 30) {
         log("The assessment made was that the last position update was too long ago for a judgement.");
         return { late: false, comfortable: false, message: " - No position updates received within the last 30 minutes." };
     }
