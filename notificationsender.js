@@ -45,8 +45,7 @@ function create(app) {
             return result;
         }
 
-
-        var brisbaneOffset = 600 - (new Date().getTimezoneOffset()); // The number of minutes that must be added to timestamps to get GMT+10 time
+        var brisbaneOffset = 600 + (new Date().getTimezoneOffset()); // The number of minutes that must be added to timestamps to get GMT+10 time
         brisbaneOffset = brisbaneOffset * 60 * 1000;
 
         var startDate = new Date(meeting.start.getTime() + brisbaneOffset);
