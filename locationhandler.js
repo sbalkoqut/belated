@@ -28,7 +28,7 @@ function create(callback) {
             email: email,
             latitude: latitude,
             longitude: longitude,
-            lastUpdate: new Date()
+            timestamp: new Date()
         };
         response.send(200);
         callback(undefined, userPosition);

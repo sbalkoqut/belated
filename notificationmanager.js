@@ -1,15 +1,16 @@
 ﻿var scheduler = require("node-schedule");
-var meetingStore = require("./meetingstore");
-var locationStore = require("./locationstore");
+//var meetingStore = require("./persistantmeetingstore");
+//var locationStore = require("./locationstore");
 var log = require("./log")("noti");
 var notificationRules = require("./notificationrules");
+var persistancy = require("./persistancy");
 
-function start(app, debug) {
+function start(app, callback) {
     var reminderMinutes = [0, 5, 15, 30, 60, 120];
-    var mStore = meetingStore();
-    var lStore = locationStore();
-    var lastMeetingDate = new Date();
-    var notificationLogic = notificationRules(app, lStore);
+    var mStore;
+    var lStore;
+    var lastMeetingDate = new Date(1900, 0);
+    var notificationLogic;
 
     function scheduleNotifications(meeting) {
         var now = Date.now();
@@ -25,56 +26,102 @@ function start(app, debug) {
                 scheduledDate.time = reminderTime; // For unit testing.
 
                 scheduler.scheduleJob(scheduledDate, function () {
-                    notificationLogic(meeting, minutes);
-                    if (minutes === 0) {
-                        log("Removing a meeting that just started.");
-                        mStore.remove(meeting);
-                    }
+                    checkMeeting(meeting, minutes);
                 });
             })(meeting, reminderMinutes[i]);
             scheduled = true;
         }
         if (!scheduled) {
-            mStore.remove(meeting);
             log("Could not schedule meeting organised by " + meeting.organiser.name + " (already occurred).");
+            mStore.remove(meeting, function (error) {
+                if (error) {
+                    log("Failed to remove meeting " + meeting._id + ": " + error);
+                }
+            });
         }
-        else
+        else {
             log("Scheduled for meeting organised by " + meeting.organiser.name + ".");
+
+        }
+    }
+
+    function checkMeeting(meeting, minutesBeforeStart)
+    {
+        notificationLogic(meeting, minutesBeforeStart, function (newPersonsLate) { 
+
+            if (minutesBeforeStart === 0) {
+                log("Removing a meeting that just started.");
+                mStore.remove(meeting, function (error) {
+                    if (error) {
+                        log("Failed to remove meeting " + meeting._id + ": " + error);
+                    }
+                });
+            }
+            else if (newPersonsLate.length > 0)
+            {
+                log("Persisting late attendees for meeting organised by " + meeting.organiser.name + ".");
+                mStore.updateNotifiedLatePersons(meeting, newPersonsLate, function (error) {
+                    if (error) {
+                        log("");
+                    }
+                });
+            }
+        });
     }
 
     function handleMeeting(meeting) {
-        mStore.add(meeting);
-        
-        if (meeting.start.getTime() <= lastMeetingDate.getTime()) {
-            // Meeting received late. Forward for immediate processing.
-            scheduleNotifications(meeting);
-        }
+        mStore.add(meeting, function (error) {
+            if (error) {
+                log("Failed to store meeting in db. Meeting dropped. " + error);
+                return;
+            }
+
+            if (meeting.start.getTime() <= lastMeetingDate.getTime()) {
+                // Meeting received late. Forward for immediate processing.
+                scheduleNotifications(meeting);
+            }
+        });
     }
 
     function handleLocation(position) {
-        lStore.setPosition(position);
+        lStore.recordPosition(position);
     }
 
     function process() {
         log("Looking for upcoming meetings...");
         var soon = new Date(Date.now() + 3 * 60 * 60 * 1000);
 
-        var meetings = mStore.getMeetingsWithin(lastMeetingDate, soon);
-        lastMeetingDate = soon;
-        for (var i = 0; i < meetings.length; i++) {
-            scheduleNotifications(meetings[i]);
-        }
+        mStore.findMeetingsWithin(lastMeetingDate, soon, function (error, meetings) {
+            if (error) {
+                log("Failed to retreive meetings. " + error);
+                return;
+            }
+
+            lastMeetingDate = soon;
+            for (var i = 0; i < meetings.length; i++) {
+                scheduleNotifications(meetings[i]);
+            }
+        });
     }
+    persistancy.connect(function (error, dataStores) {
+        if (error) {
+            log("Failed to connect to persistency.")
+            callback(error);
+        }
 
-    
+        mStore = dataStores.meetings;
+        lStore = dataStores.locations;
 
-    var rule = new scheduler.RecurrenceRule();
-    rule.minute = [1, 31 ];
+        notificationLogic = notificationRules(app, lStore);
 
-    scheduler.scheduleJob(rule, process);
-    process();
+        var rule = new scheduler.RecurrenceRule();
+        rule.minute = [1, 31];
 
-    return { handleMeeting: handleMeeting, handleLocation: handleLocation };
+        scheduler.scheduleJob(rule, process);
+        process();
+
+        callback(null, { handleMeeting: handleMeeting, handleLocation: handleLocation });
+    });
 }
 
 exports = module.exports = start;

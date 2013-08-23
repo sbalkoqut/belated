@@ -8,7 +8,7 @@ describe("locationHandler", function () {
 
         function runTest(body, responseCode, validRequest, method) {
             function validateResult(startTime, endTime, position) {
-                var recordedTime = position.lastUpdate.getTime();
+                var recordedTime = position.timestamp.getTime();
 
                     assert((recordedTime >= startTime) && (recordedTime <= endTime), "The time recorded alongside the position should be around the time the method is called.");
 
@@ -16,7 +16,7 @@ describe("locationHandler", function () {
                         email: body.email,
                         latitude: body.lat,
                         longitude: body.lng,
-                        lastUpdate: new Date(recordedTime)
+                        timestamp: new Date(recordedTime)
                     });
             }
             if (!responseCode)
@@ -85,13 +85,6 @@ describe("locationHandler", function () {
                 email: "j@a"
             }, 400, false);
             runTest({}, 400, false);
-        });
-    });
-
-    describe("#getPosition", function () {
-        it("should return undefined when no position has been received", function () {
-            var locationStore = require("../locationstore")();
-            assert.strictEqual(locationStore.getPosition("john@gmail.com"), undefined);
         });
     });
 });

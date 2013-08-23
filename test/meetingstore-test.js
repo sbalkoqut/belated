@@ -1,121 +1,168 @@
 ﻿var assert = require("assert");
-var meetingStore = require("../meetingstore");
+var nodemock = require("nodemock");
+var meetingStore = require("../meetingstore")
+describe("persistant meeting store", function () {
+    
+    var dbMock;
+    var collectionMock;
 
-describe("meetingStore", function () {
-    var store;
-    // Sorted list of meetings by start time.
-    var meetings = [{
-        location: "Brisbane, Australia",
-        latitude: 1.92,
-        longitude: 192.3,
-        start: new Date(Date.UTC(2013, 4, 23, 0, 30, 0, 0)),
-        end: new Date(Date.UTC(2013, 4, 23, 1, 0, 0, 0)),
-        organiser: {
-            name: "Pierre Curie",
-            email: "pierre.curie@live.com"
-        },
-        attendees: [{
-            name: "John Smith",
-            email: "johnny.smith@gmail.com"
-        }],
-        subject: "Meeting Subject",
-        description: "Meeting body.\n",
-        emailId: "<BLU401-EAS404DE843EABFACD74383473288F1@phx.gbl>"
-    }, {
-        location: "Sydney, Australia",
-        latitude: -81.3,
-        longitude: -50.1,
-        start: new Date(Date.UTC(2013, 5, 23, 10, 30, 0, 0)),
-        end: new Date(Date.UTC(2013, 5, 23, 11, 0, 0, 0)),
-        organiser: {
-            name: "Sophie Alexandera",
-            email: "sophiealexandra@random.us"
-        },
-        attendees: [{
-            name: "Wolfgang Apfelbaum",
-            email: "wolfgang.apfelbaum@web.de"
-        }],
-        subject: "Picnic",
-        description: "Formal invitation to a casual picnic with dog.\n",
-        emailId: "<BLU401-EAS404DE843EABFACD74383473288F0@phx.gbl>"
-    }];
+    beforeEach(function () {
+        collectionMock = nodemock.mock("ensureIndex").takes({ start: 1 }, { w: 1 }, function () { }).calls(2, [null, null])
+        dbMock = nodemock.mock("createCollection").takes("meetings", { w: 1 }, function () { }).calls(2, [null, collectionMock]);
+    });
 
-    describe("#add", function () {
-        beforeEach(function () {
-            store = meetingStore();
-        });
+    function assertMocks() {
+        collectionMock.assertThrows();
+        dbMock.assertThrows();
+    }
 
-        it("should add and delete a meeting successfully", function () {
-            var meeting = meetings[0];
-            store.add(meeting);
+    afterEach(function () {
+        collectionMock = undefined;
+        dbMock = undefined;
+    });
 
-            var result = store.getMeetingsWithin(meeting.start, meeting.start);
-            assert.deepEqual(result, [meeting], "the meeting should be accessible via #getMeetingsWithin");
-
-            store.remove(meeting);
-            result = store.getMeetingsWithin(meeting.start, meeting.start);
-            assert.deepEqual(result, [], "the meeting should no longer be accessible via #getMeetingsWithin after deletion");
-        });
-      
-        it("should add multiple meetings successfully", function () {
-            for (var i = 0; i < meetings.length; i++) {
-                store.add(meetings[i]);
-            }
-            for (var i = 0; i < meetings.length; i++) {
-                var result = store.getMeetingsWithin(meetings[i].start, meetings[i].start);
-                assert.deepEqual(result, [meetings[i]], "the meeting should be accessible via #getMeetingsWithin");
-            }
-            var all = store.getMeetingsWithin(meetings[0].start, meetings[meetings.length-1].start);
-            assert.deepEqual(all, meetings, "all meetings should be accessible in order via #getMeetingsWithin");
-
-            for (var i = 0; i < meetings.length; i++) {
-                store.remove(meetings[i]);
-
-                var result = store.getMeetingsWithin(meetings[i].start, meetings[i].start);
-                assert.deepEqual(result, [], "the meeting should not be accessible via #getMeetingsWithin");
-            }
-            all = store.getMeetingsWithin(meetings[0].start, meetings[meetings.length - 1].start);
-            assert.deepEqual(all, [], "all meetings should no longer be accessible in order via #getMeetingsWithin");
-
-        });
-        it("should add multiple meetings successfully", function () {
-            for (var i = meetings.length - 1; i >= 0; i--) {
-                store.add(meetings[i]);
-            }
-            for (var i = 0; i < meetings.length; i++) {
-                var result = store.getMeetingsWithin(meetings[i].start, meetings[i].start);
-                assert.deepEqual(result, [meetings[i]], "the meeting should be accessible via #getMeetingsWithin");
-            }
-            var all = store.getMeetingsWithin(meetings[0].start, meetings[meetings.length - 1].start);
-            assert.deepEqual(all, meetings, "all meetings should be accessible in order via #getMeetingsWithin");
-
-        });
-
-        afterEach(function () {
-            store = undefined;
+    it("should add records successfully", function (done) {
+        var record = {
+            start: new Date(2010, 1, 1, 5, 30, 0, 0),
+            end: new Date(2010, 1, 1, 6, 0, 0, 0),
+            location: "Eiffel Tower",
+            latitude: 48.85869,
+            longitude: 2.294285,
+            subject: "Meeting in Paris",
+            description: "To discuss landmarks.",
+            emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr" },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com" }, { name: "Quan Ping", email: "quan.ping@web.ch" }]
+        };
+        collectionMock.mock("insert").takes(record, { w: 1 }, function () { }).calls(2, [null, undefined]);
+        meetingStore.create(dbMock, function (error, store) {
+            assert.strictEqual(error, null, "#error after initialisation should be null.");
+            store.add(record, function (error) {
+                assert.strictEqual(error, null, "#error after add should be null.");
+                assertMocks();
+                done();
+            });
         });
     });
 
+    it("should update which meeting participants have been notified as late", function (done) {
+        var id = { id: "Imitation instance of ObjectID" };
+        var before = {
+            _id: id,
+            start: new Date(2010, 1, 1, 5, 30, 0, 0),
+            end: new Date(2010, 1, 1, 6, 0, 0, 0),
+            location: "Eiffel Tower",
+            latitude: 48.85869,
+            longitude: 2.294285,
+            subject: "Meeting in Paris",
+            description: "To discuss landmarks.",
+            emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false }]
+        };
+        var after = {
+            _id: id,
+            start: new Date(2010, 1, 1, 5, 30, 0, 0),
+            end: new Date(2010, 1, 1, 6, 0, 0, 0),
+            location: "Eiffel Tower",
+            latitude: 48.85869,
+            longitude: 2.294285,
+            subject: "Meeting in Paris",
+            description: "To discuss landmarks.",
+            emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: true },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: true }]
+        };
 
-    describe("#getMeetingsWithin", function () {
-        beforeEach(function () {
-            store = meetingStore();
-        });
-        it("should return an empty array of meetings for any valid timespan when none have been added", function () {
-           
-            var result = store.getMeetingsWithin(new Date(Date.UTC(2000, 0, 0, 0, 0, 0, 0)),
-                new Date(Date.UTC(2200, 0, 0, 0, 0, 0, 0)));
-            assert.deepEqual(result, []);
-        });
+        var update = {
+            $set: {
+                "organiser.notifiedLate": true,
+                "attendees.1.notifiedLate": true
+            }
+        };
+        console.log(update);
+        collectionMock.mock("update").takes({ _id: id }, update, { w: 1 }, function () { }).calls(3, [null, undefined]);
+        meetingStore.create(dbMock, function (error, store) {
+            assert.strictEqual(error, null, "#error after initialisation should be null.");
 
-        it("should return an empty array of meetings for any valid timespan where no meetings have been added for", function () {
-            var result = store.getMeetingsWithin(new Date(meetings[0].start.getTime() + 1),
-                new Date(meetings[1].start.getTime() - 1));
-            assert.deepEqual(result, []);
+            store.updateNotifiedLatePersons(before, [before.organiser, before.attendees[1]], function (error) {
+                assert.strictEqual(error, null, "#error after update should be null.");
+                assert.deepEqual(before, after, "meeting should be updated to reflect database state");
+                assertMocks();
+                done();
+            });
         });
-        afterEach(function () {
-            store = undefined;
-        });
+    });
 
+    it("should remove records successfully", function (done) {
+        var id = { id: "Imitation instance of ObjectID" };
+        var record = {
+            _id: id,
+            start: new Date(2010, 1, 1, 5, 30, 0, 0),
+            end: new Date(2010, 1, 1, 6, 0, 0, 0),
+            location: "Eiffel Tower",
+            latitude: 48.85869,
+            longitude: 2.294285,
+            subject: "Meeting in Paris",
+            description: "To discuss landmarks.",
+            emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr" },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com" }, { name: "Quan Ping", email: "quan.ping@web.ch" }]
+        };
+        collectionMock.mock("remove").takes({ _id: id }, { w: 1 }, function () { }).calls(2, [null, undefined]);
+        meetingStore.create(dbMock, function (error, store) {
+            assert.strictEqual(error, null, "#error after initialisation should be null.");
+            store.remove(record, function (error) {
+                assert.strictEqual(error, null, "#error after add should be null.");
+                assertMocks();
+                done();
+            });
+        });
+    });
+
+    it("should find records between a certain range successfully", function (done) {
+
+        var records = [{
+            _id: { id: "Imitation instance of ObjectID" },
+            start: new Date(2010, 1, 1, 5, 30, 0, 0),
+            end: new Date(2010, 1, 1, 6, 0, 0, 0),
+            location: "Eiffel Tower",
+            latitude: 48.85869,
+            longitude: 2.294285,
+            subject: "Meeting in Paris",
+            description: "To discuss le landmarks.",
+            emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr" },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com" }, { name: "Quan Ping", email: "quan.ping@web.ch" }]
+        }, {
+            _id: { id: "Imitation instance of ObjectID2" },
+            start: new Date(2010, 1, 1, 6, 30, 0, 0),
+            end: new Date(2010, 1, 1, 7, 0, 0, 0),
+            location: "Brandenburger Tor",
+            latitude: 52.516675,
+            longitude: 13.377808,
+            subject: "Meeting in Berlin",
+            description: "To discuss ze landmarks.",
+            emailId: "7392ea32421b213c4d2ddba3010@somewhere.com",
+            organiser: { name: "Johnas Schmidt", email: "j.schmidt@web.de" },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com" }, { name: "Ian Ling", email: "ian.ling@web.ch" }]
+        }];
+        var start = new Date(2010, 1, 1, 5, 30);
+        var end = new Date(2010, 1, 1, 6, 30);
+
+        var cursorMock = nodemock.mock("toArray").takes(function () { }).calls(0, [null, records]);
+        collectionMock.mock("find").takes({ start: { $gte: start, $lte: end } }).returns(cursorMock);
+
+        meetingStore.create(dbMock, function (error, store) {
+            assert.strictEqual(error, null, "#error after initialisation should be null.");
+            store.findMeetingsWithin(start, end, function (error, result) {
+                assert.strictEqual(error, null, "#error after add should be null.");
+                assert.strictEqual(result, records);
+
+                cursorMock.assertThrows()
+                assertMocks();
+                done();
+            });
+        });
     });
 });

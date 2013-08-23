@@ -14,12 +14,12 @@ function couldMake(meeting, position) {
 
     var distanceInMeters = geoDistance.getDistance(meeting.latitude, meeting.longitude, position.latitude, position.longitude);
 
-    var minutesSinceUpdate = (Date.now() - position.lastUpdate.getTime()) / 60000;
-    var atUpdateMinutesUntilMeeting = (meeting.start.getTime() - position.lastUpdate.getTime()) / 60000;
+    var minutesSinceUpdate = (Date.now() - position.timestamp.getTime()) / 60000;
+    var atUpdateMinutesUntilMeeting = (meeting.start.getTime() - position.timestamp.getTime()) / 60000;
     var currentMinutesUntilMeeting = (meeting.start.getTime() - Date.now()) / 60000;
 
     var locationString = (distanceInMeters < 100) ? "<0.1" : (Math.floor(distanceInMeters / 100) / 10).toString();
-    locationString += " km away at " + dateFormat(position.lastUpdate, "h:MM tt");
+    locationString += " km away at " + dateFormat(position.timestamp, "h:MM tt");
 
 
     if (minutesSinceUpdate > 30) {
@@ -30,7 +30,7 @@ function couldMake(meeting, position) {
     var usingMaxRange = rangeReport(atUpdateMinutesUntilMeeting, distanceInMeters);
     var usingComfortableRange = rangeReport(atUpdateMinutesUntilMeeting - comfortableMinsEarly, distanceInMeters, comfortableSlack);
 
-    log(position.email + "'s last reported position was " + distanceInMeters + " meters away from meeting at " + position.lastUpdate + ".");
+    log(position.email + "'s last reported position was " + distanceInMeters + " meters away from meeting at " + position.timestamp + ".");
 
     if (usingMaxRange.canMake) {
         if (usingComfortableRange.canMake) {

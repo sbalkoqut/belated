@@ -2,7 +2,6 @@ var loadConfiguration = require('./config');
 
 loadConfiguration(
     function start(configuration) {
-
 /**
  * Module dependencies.
  */
@@ -19,9 +18,7 @@ loadConfiguration(
           , notifications = require('./notificationmanager');
 
     var app = express();
-
-    // all environments
-    app.set('port', process.env.PORT || 80);
+    app.set('port', 80);
     app.set('views', __dirname + '/views');
     app.set('view engine', 'jade');
     app.use(express.favicon());
@@ -31,54 +28,58 @@ loadConfiguration(
     app.use(app.router);
     app.use(express.static(path.join(__dirname, 'public')));
 
+
     // development only
     if ('development' == app.get('env')) {
         app.use(express.errorHandler());
     }
 
-
-
     app.get('/', routes.index);
-    app.get('/users', user.list);
 
-    var notificationManager = notifications(app);
+    notifications(app, function (error, notificationManager) {
 
-    app.all('/location', locationHandler(function (error, location) {
-        if (error)
-            console.log("[LOCATION] An update failed. " + error);
-        else {
-            console.log("[LOCATION] received: " + inspect(location));
-            notificationManager.handleLocation(location);
+        if (error) {
+            console.log("[FATAL] Couldn't start notification manager. " + error);
+            return;
         }
-    }));
 
-
-    emailClient(
-        new imap(configuration.imap),
-        emailHandler(function (error, meeting) {
+        app.all('/REST/location', locationHandler(function (error, location) {
             if (error)
-                console.log("A meeting was not added. " + error);
+                console.log("[LOCATION] An update failed. " + error);
             else {
-                console.log("Meeting received: " + inspect(meeting));
-                notificationManager.handleMeeting(meeting);
+                console.log("[LOCATION] received: " + inspect(location));
+                notificationManager.handleLocation(location);
             }
-        }),
-        true);
+        }));
 
-    var httpServer = http.createServer(app);
-    httpServer.on("error", function (error) {
-        console.log();
-        if (error.code == "EADDRINUSE") {
-            console.log("[ERROR] Couldn't start HTTP server: The port in use.");
-        }
-        else {
-            console.log("[ERROR] Problem with HTTP server:");
-            console.log(error);
-        }
-        console.log();
-        process.exit(1);
-    });
-    httpServer.listen(app.get('port'), function () {
-        console.log('[HTTP] Express server listening on port ' + app.get('port'));
+
+        emailClient(
+            new imap(configuration.imap),
+            emailHandler(function (error, meeting) {
+                if (error)
+                    console.log("A meeting was not added. " + error);
+                else {
+                    console.log("Meeting received: " + inspect(meeting));
+                    notificationManager.handleMeeting(meeting);
+                }
+            }),
+            true);
+
+        var httpServer = http.createServer(app);
+        httpServer.on("error", function (error) {
+            console.log();
+            if (error.code == "EADDRINUSE") {
+                console.log("[ERROR] Couldn't start HTTP server: The port in use.");
+            }
+            else {
+                console.log("[ERROR] Problem with HTTP server:");
+                console.log(error);
+            }
+            console.log();
+            process.exit(1);
+        });
+        httpServer.listen(app.get('port'), function () {
+            console.log('[HTTP] Express server listening on port ' + app.get('port'));
+        });
     });
 });
