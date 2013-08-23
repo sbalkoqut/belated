@@ -1,7 +1,7 @@
 ﻿var assert = require("assert");
-var distance = require("../distance");
+var distance = require("../lib/distance");
 var inspect = require("util").inspect;
-var log = require("../log");
+var log = require("../lib/log");
 describe('distance', function () {
     before(function () {
         log.enabled = false;

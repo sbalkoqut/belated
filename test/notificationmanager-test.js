@@ -13,7 +13,7 @@ describe("notificationmanager", function () {
   
     var meetingsWithin;
 
-    var allowedModules = ["./log", "../log", "../notificationmanager"];
+    var allowedModules = ["./log", "../lib/log", "../lib/notificationmanager"];
     var minute = 60 * 1000;
 
     beforeEach(function () {
@@ -67,7 +67,7 @@ describe("notificationmanager", function () {
         
         mockery.enable({ useCleanCache: true });
 
-        require("../notificationmanager")(app, function (error, instance) {
+        require("../lib/notificationmanager")(app, function (error, instance) {
             assert.strictEqual(error, null, "#start should not return an error.");
             nm = instance;
             callback();

@@ -1,4 +1,4 @@
-var loadConfiguration = require('./config');
+var loadConfiguration = require('./lib/config');
 
 loadConfiguration(
     function start(configuration) {
@@ -10,12 +10,12 @@ loadConfiguration(
           , user = require('./routes/user')
           , http = require('http')
           , path = require('path')
-          , emailClient = require('./emailclient')
+          , emailClient = require('./lib/emailclient')
           , imap = require('imap')
-          , emailHandler = require('./emailhandler')
-          , locationHandler = require('./locationhandler')
+          , emailHandler = require('./lib/emailhandler')
+          , locationHandler = require('./lib/locationhandler')
           , inspect = require('util').inspect
-          , notifications = require('./notificationmanager');
+          , notifications = require('./lib/notificationmanager');
 
     var app = express();
     app.set('port', 80);

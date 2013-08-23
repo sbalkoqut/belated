@@ -1,6 +1,6 @@
 ﻿var assert = require("assert");
 var nodemock = require("nodemock");
-var meetingStore = require("../meetingstore")
+var meetingStore = require("../lib/meetingstore")
 describe("persistant meeting store", function () {
     
     var dbMock;

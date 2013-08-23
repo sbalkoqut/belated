@@ -1,6 +1,6 @@
 ﻿var nodemock = require("nodemock");
 var assert = require("assert");
-var locationHandler = require("../locationhandler");
+var locationHandler = require("../lib/locationhandler");
 
 describe("locationHandler", function () {
     describe("#create", function () {
