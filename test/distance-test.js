@@ -1,7 +1,7 @@
 ﻿var assert = require("assert");
-var distance = require("../distance");
+var distance = require("../lib/distance");
 var inspect = require("util").inspect;
-var log = require("../log");
+var log = require("../lib/log");
 describe('distance', function () {
     before(function () {
         log.enabled = false;
@@ -18,7 +18,7 @@ describe('distance', function () {
         // However, they probably still need to walk into a building and so on they will likely just make it on time.
         var report = distance(
             { start: new Date(Date.now() + 9 * minute), latitude: -27.468968, longitude: 153.023499 },
-            { email: "john.smith@gmail.com", latitude: -27.469600, longitude: 153.020347, lastUpdate: new Date(Date.now() - 1 * minute)});
+            { email: "john.smith@gmail.com", latitude: -27.469600, longitude: 153.020347, timestamp: new Date(Date.now() - 1 * minute) });
         
         assert.strictEqual(report.late, false);
         assert.strictEqual(report.comfortable, false);
@@ -30,7 +30,7 @@ describe('distance', function () {
         // If walking, directions state they need 7 minutes but only have 3. So late.
         var report = distance(
             { start: new Date(Date.now() + 2 * minute), latitude: -27.468968, longitude: 153.023499 },
-            { email: "john.smith@gmail.com", latitude: -27.469600, longitude: 153.020347, lastUpdate: new Date(Date.now() - 1 * minute) });
+            { email: "john.smith@gmail.com", latitude: -27.469600, longitude: 153.020347, timestamp: new Date(Date.now() - 1 * minute) });
 
         assert.strictEqual(report.late, true);
         assert.strictEqual(report.comfortable, false);
@@ -42,7 +42,7 @@ describe('distance', function () {
         // They are therefore comfortably on time. Same can be said for if using car.
         var report = distance(
             { start: new Date(Date.now() + 15 * minute), latitude: -27.468968, longitude: 153.023499 },
-            { email: "john.smith@gmail.com", latitude: -27.469600, longitude: 153.020347, lastUpdate: new Date(Date.now() - 1 * minute) });
+            { email: "john.smith@gmail.com", latitude: -27.469600, longitude: 153.020347, timestamp: new Date(Date.now() - 1 * minute) });
 
         assert.strictEqual(report.late, false);
         assert.strictEqual(report.comfortable, true);

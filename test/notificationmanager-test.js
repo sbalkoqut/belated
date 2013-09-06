@@ -5,15 +5,15 @@ var nodemock = require("nodemock");
 describe("notificationmanager", function () {
     
     var app;
-    var locationStorage;
-    var meetingStorage, meetingStore;
+    var persistancy;
     var locationStore;
+    var meetingStore;
     var rulesModule, rules;
     var scheduler;
   
     var meetingsWithin;
 
-    var allowedModules = ["./log", "../log", "../notificationmanager"];
+    var allowedModules = ["./log", "../lib/log", "../lib/notificationmanager"];
     var minute = 60 * 1000;
 
     beforeEach(function () {
@@ -23,31 +23,31 @@ describe("notificationmanager", function () {
         scheduler.mock("scheduleJob").takes({ "Mock instance of Type": "RecurrenceRule", minute: [1, 31] }, function () { });
     });
 
-    function beginTest() {
+    function beginTest(callback) {
         function extendMeetingStore() {
             meetingStore = meetingStore || { };
 
-            meetingStore.getMeetingsWithin = function (start, end) {
-                if (!meetingStore.getMeetingsWithin.end)
-                    meetingStore.getMeetingsWithin.end = Date.now();
-                var expectedStart = meetingStore.getMeetingsWithin.end;
+            meetingStore.findMeetingsWithin = function (start, end, callback) {
+                if (!meetingStore.findMeetingsWithin.end)
+                    meetingStore.findMeetingsWithin.end = new Date(1900, 0);
+                var expectedStart = meetingStore.findMeetingsWithin.end;
                 var expectedEnd = Date.now() + 3 * 60 * minute;
 
-                assert(start.getTime() <= expectedStart, "#getMeetingsWithin was not called with a correct start parameter.");
-                assert(start.getTime() > (expectedStart - 100), "#getMeetingsWithin was not called with a correct start parameter.");
-                assert(end.getTime() <= expectedEnd, "#getMeetingsWithin was not called with a correct end parameter.");
-                assert(end.getTime() > (expectedEnd - 100), "#getMeetingsWithin was not called with a correct end parameter.");
+                assert(start.getTime() <= expectedStart, "#findMeetingsWithin was not called with a correct start parameter.");
+                assert(start.getTime() > (expectedStart - 100), "#findMeetingsWithin was not called with a correct start parameter.");
+                assert(end.getTime() <= expectedEnd, "#findMeetingsWithin was not called with a correct end parameter.");
+                assert(end.getTime() > (expectedEnd - 100), "#findMeetingsWithin was not called with a correct end parameter.");
 
-                meetingStore.getMeetingsWithin.end = end.getTime();
-                meetingStore.getMeetingsWithin.start = start.getTime();
-                meetingStore.getMeetingsWithin.count++;
+                meetingStore.findMeetingsWithin.end = end.getTime();
+                meetingStore.findMeetingsWithin.start = start.getTime();
+                meetingStore.findMeetingsWithin.count++;
                 
-                if (meetingStore.getMeetingsWithin.count == 2)
-                    return meetingsWithin;
+                if (meetingStore.findMeetingsWithin.count == 2)
+                    callback(null, meetingsWithin);
                 else
-                    return [];
+                    callback(null, []);
             }
-            meetingStore.getMeetingsWithin.count = 0;
+            meetingStore.findMeetingsWithin.count = 0;
         }
         meetingsWithin = meetingsWithin || [];
 
@@ -55,59 +55,64 @@ describe("notificationmanager", function () {
 
         mockery.registerAllowables(allowedModules);
 
-        locationStorage = nodemock.mock("create").returns(locationStore);
-        meetingStorage = nodemock.mock("create").returns(meetingStore);
+        persistancy = nodemock.mock("connect").takes(function () { }).calls(0, [null, { meetings: meetingStore, locations: locationStore }]);
+        //locationStorage = nodemock.mock("create").returns(locationStore);
+        //meetingStorage = nodemock.mock("create").takes({}, function(){}).calls(1, meetingStore);
         rulesModule = nodemock.mock("create").takes(app, locationStore).returns(rules);
 
         mockery.registerMock("./notificationrules", rulesModule.create);
-        mockery.registerMock("./locationstore", locationStorage.create);
-        mockery.registerMock("./meetingstore", meetingStorage.create);
+        mockery.registerMock("./persistancy", persistancy);
+        //mockery.registerMock("./persistantmeetingstore", meetingStorage);
         mockery.registerMock("node-schedule", scheduler);
         
         mockery.enable({ useCleanCache: true });
 
-        nm = require("../notificationmanager")(app);
+        require("../lib/notificationmanager")(app, function (error, instance) {
+            assert.strictEqual(error, null, "#start should not return an error.");
+            nm = instance;
+            callback();
+        });
     }
 
     function endTest() {
         rulesModule.assertThrows();
-        locationStorage.assertThrows();
-        meetingStorage.assertThrows();
+        persistancy.assertThrows();
         scheduler.assertThrows();
     }
 
     afterEach(function () {
         rules = undefined;
         locationStore = undefined;
-        meetingStorage = undefined;
+        persistancy = undefined;
         meetingStore = undefined;
         rulesModule = undefined;
-        locationStorage = undefined;
         meetingsWithin = undefined;
         mockery.deregisterAll();
         mockery.disable();
     });
 
 
-    it("should store location updates", function () {
+    it("should store location updates", function (done) {
         var position = {
             latitude: -52.821732,
             longitude: -23.1232,
             email: "john.smith@gmail.com",
             lastUpdate: new Date(2013, 6, 13, 10, 17, 39)
         };
-        locationStore = nodemock.mock("setPosition").takes(position);
+        locationStore = nodemock.mock("recordPosition").takes(position);
 
-        beginTest();
+        beginTest(function () {
 
-        nm.handleLocation(position);
+            nm.handleLocation(position);
 
-        endTest();
-        locationStore.assert();
-        assert.strictEqual(meetingStore.getMeetingsWithin.count, 1, "#getMeetingsWithin() should only be called once at the start.");
+            endTest();
+            locationStore.assert();
+            assert.strictEqual(meetingStore.findMeetingsWithin.count, 1, "#findMeetingsWithin() should only be called once at the start.");
+            done();
+        });
     });
 
-    it("should just store meetings more than 3 hours away", function () {
+    it("should just store meetings more than 3 hours away", function (done) {
         var meeting = {
             location: "Brisbane, Australia",
             latitude: 1.92,
@@ -124,21 +129,24 @@ describe("notificationmanager", function () {
             description: "Meeting body.\n",
             emailId: "<BLU401-EAS404DE843EABFACD74383473288F1@phx.gbl>"
         };
-        meetingStore = nodemock.mock("add").takes(meeting);
+        meetingStore = nodemock.mock("add").takes(meeting, function () { }).calls(1, null);
 
-        beginTest();
+        beginTest(function () {
 
-        meeting.start = new Date(meetingStore.getMeetingsWithin.end + 1);
-        meeting.end = new Date(meetingStore.getMeetingsWithin.end + 1001);
+            meeting.start = new Date(meetingStore.findMeetingsWithin.end + 1);
+            meeting.end = new Date(meetingStore.findMeetingsWithin.end + 1001);
 
-        nm.handleMeeting(meeting);
+            nm.handleMeeting(meeting);
 
-        endTest();
-        meetingStore.assertThrows();
-        assert.strictEqual(meetingStore.getMeetingsWithin.count, 1, "#getMeetingsWithin() should only be called once at the start.");
+            endTest();
+            meetingStore.assertThrows();
+            assert.strictEqual(meetingStore.findMeetingsWithin.count, 1, "#findMeetingsWithin() should only be called once at the start.");
+
+            done();
+        });
     });
 
-    it("should schedule (and store) meetings within 3 hours away", function () {
+    it("should schedule (and store) meetings within 3 hours away", function (done) {
         var startTime = Date.now() + 45 * minute;
         var meeting = {
             location: "Perth, Australia",
@@ -158,34 +166,41 @@ describe("notificationmanager", function () {
             description: "There were no sales.\n",
             emailId: "<BLU401-EAS404DE843EABFACD74383473288F2@phx.gbl>"
         };
-        meetingStore = nodemock.mock("add").takes(meeting);
-        meetingStore.mock("remove").takes(meeting).returns(true);
+        meetingStore = nodemock.mock("add").takes(meeting, function () { }).calls(1, null);
+        meetingStore = meetingStore.mock("remove").takes(meeting, function () { }).calls(1, null);
 
         var rulesMock = nodemock;
 
         var minutesBefore = [0, 5, 15, 30];
 
         for (var i = 0; i < minutesBefore.length; i++) {
+            var latePerson = { "Sample late person" : minutesBefore[i] };
+
             var scheduleDate = new Date(startTime - (minutesBefore[i] * minute));
             scheduleDate.time = scheduleDate.getTime();
-            scheduler.mock("scheduleJob").takes(scheduleDate, function () { }).calls(1);
-            rulesMock = rulesMock.mock("runLogic").takes(meeting, minutesBefore[i]);
+            scheduler = scheduler.mock("scheduleJob").takes(scheduleDate, function () { }).calls(1);
+            rulesMock = rulesMock.mock("runLogic").takes(meeting, minutesBefore[i], function () { }).calls(2, [[latePerson]]);
+            if (minutesBefore[i] > 0) {
+                meetingStore = meetingStore.mock("updateNotifiedLatePersons").takes(meeting, [latePerson], function () { }).calls(2, null);
+            }
         }
 
         rules = rulesMock.runLogic;
 
 
-        beginTest();
+        beginTest(function () {
 
-        nm.handleMeeting(meeting);
+            nm.handleMeeting(meeting);
 
-        endTest();
-        rulesMock.assertThrows();
-        meetingStore.assertThrows();
-        assert.strictEqual(meetingStore.getMeetingsWithin.count, 1, "#getMeetingsWithin() should only be called once at the start.");
+            endTest();
+            rulesMock.assertThrows();
+            meetingStore.assertThrows();
+            assert.strictEqual(meetingStore.findMeetingsWithin.count, 1, "#findMeetingsWithin() should only be called once at the start.");
+            done();
+        });
     });
 
-    it("should periodically retreive new meetings and schedule them", function () {
+    it("should periodically retreive new meetings and schedule them", function (done) {
 
         scheduler.calls(1);
 
@@ -215,23 +230,33 @@ describe("notificationmanager", function () {
 
         var minutesBefore = [0, 5, 15, 30, 60, 120];
         for (var m = 0; m < meetingsWithin.length; m++) {
+            var meeting = meetingsWithin[m];
             for (var i = 0; i < minutesBefore.length; i++) {
-                var scheduleDate = new Date(meetingsWithin[m].start.getTime() - (minutesBefore[i] * minute));
+
+                var latePerson = { "Sample late person" : minutesBefore[i] };
+
+                var scheduleDate = new Date(meeting.start.getTime() - (minutesBefore[i] * minute));
                 scheduleDate.time = scheduleDate.getTime();
-                scheduler.mock("scheduleJob").takes(scheduleDate, function () { }).calls(1);
-                rulesMock = rulesMock.mock("runLogic").takes(meetingsWithin[m], minutesBefore[i]);
+                scheduler = scheduler.mock("scheduleJob").takes(scheduleDate, function () { }).calls(1);
+                rulesMock = rulesMock.mock("runLogic").takes(meeting, minutesBefore[i], function () { }).calls(2, [[latePerson]]);
+
+                if (minutesBefore[i] > 0) {
+                    meetingStore = meetingStore.mock("updateNotifiedLatePersons").takes(meeting, [latePerson], function () { }).calls(2, null);
+                }
             }
-            meetingStore = meetingStore.mock("remove").takes(meetingsWithin[m]).returns(true);
+            meetingStore = meetingStore.mock("remove").takes(meeting, function () { }).calls(1, null);
         }
 
         rules = rulesMock.runLogic;
 
-        beginTest();
+        beginTest(function () {
 
-        endTest();
-        rulesMock.assertThrows();
-        meetingStore.assertThrows();
-        assert.strictEqual(meetingStore.getMeetingsWithin.count, 2, "#getMeetingsWithin() should only be called once at the start, and once per periodic processing loop.");
+            endTest();
+            rulesMock.assertThrows();
+            meetingStore.assertThrows();
+            assert.strictEqual(meetingStore.findMeetingsWithin.count, 2, "#findMeetingsWithin() should only be called once at the start, and once per periodic processing loop.");
+            done();
+        });
 
     });
 
