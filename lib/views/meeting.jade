@@ -1,0 +1,37 @@
+!!! Strict
+html
+  head
+    title Meeting
+    style(type="text/css").
+      body { font: 13px Arial, sans-serif; color: #222; background-color: #EEE; }
+      #content { width: 800px; margin: 10px auto 10px auto; padding: 10px 10px; background-color: #FFF; }
+    script(type="text/javascript", src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0")
+    script(type="text/javascript", src="/javascripts/jquery-1.10.2.js")
+    script(type="text/javascript", src="/javascripts/meetingmap.js")
+    
+  body(onload="GetMap('#{id}', #{latitude}, #{longitude});")
+    div(id="content")
+      h1 #{subject}
+      p !{description}
+      h3 When
+      p #{start} - #{end}
+      h3 Where
+      div(id="maparea")
+        p #{location}
+        if isGeocoded
+          p(id="mapinstructions") Drag the blue push pin, or double-click on the map, to adjust the coordinates of your meeting.
+        else
+          p We can't track your meeting until you tell us the coordinates of your meeting.
+          p(id="mapinstructions") Double-click on the map to set the coordinates of your meeting.
+        label(for="locationSearch") Center the map at 
+        input(name="locationSearch", id="locationSearch")
+        input(type="button", id="locationSearchButton", value="Go")
+        div(id="map", style="position:relative; width:800px; height:400px;")
+      h3 Who
+      ul
+        li
+          a(href="mailto:#{organiser.email}") #{organiser.name}
+        each attendee in attendees
+          li 
+            a(href="mailto:#{attendee.email}") #{attendee.name}
+
