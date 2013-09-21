@@ -55,7 +55,7 @@ describe("notificationmanager", function () {
         mockery.registerAllowables(allowedModules);
 
         rulesModule = nodemock.mock("create").takes(app, locationStore).returns(rules);
-
+       
         mockery.registerMock("./notificationrules", rulesModule.create);
         mockery.registerMock("node-schedule", scheduler);
         

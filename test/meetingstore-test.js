@@ -12,7 +12,10 @@ describe("persistant meeting store", function () {
     var allowedModules = ["./log", "./utils", "../lib/meetingstore"];
 
     beforeEach(function () {
-        collectionMock = nodemock.mock("ensureIndex").takes({ start: 1 }, { w: 1 }, function () { }).calls(2, [null, null])
+        collectionMock = nodemock
+            .mock("ensureIndex").takes({ start: 1 }, { w: 1 }, function () { }).calls(2, [null, null])
+            .mock("ensureIndex").takes({ "organiser.email": 1 }, { w: 1 }, function () { }).calls(2, [null, null])
+            .mock("ensureIndex").takes({ "attendees.email": 1 }, { w: 1 }, function () { }).calls(2, [null, null]);
         dbMock = nodemock.mock("createCollection").takes("meetings", { w: 1 }, function () { }).calls(2, [null, collectionMock]);
     });
 
@@ -59,8 +62,8 @@ describe("persistant meeting store", function () {
             subject: "Meeting in Paris",
             description: "To discuss landmarks.",
             emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr" },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com" }, { name: "Quan Ping", email: "quan.ping@web.ch" }]
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", track: true },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", track: false }, { name: "Quan Ping", email: "quan.ping@web.ch", track: true }]
         };
         var insertedRecord = {
             _id: { id: "Imitation instance of ObjectID" },
@@ -73,8 +76,8 @@ describe("persistant meeting store", function () {
             subject: "Meeting in Paris",
             description: "To discuss landmarks.",
             emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr" },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com" }, { name: "Quan Ping", email: "quan.ping@web.ch" }]
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", track: true },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", track: false }, { name: "Quan Ping", email: "quan.ping@web.ch", track: true }]
         };
         objectIdMock = nodemock.mock("ObjectID").returns({ id: "Imitation instance of ObjectID" });
         collectionMock.mock("insert").takes(insertedRecord, { w: 1 }, function () { }).calls(2, [null, undefined]);
@@ -106,8 +109,8 @@ describe("persistant meeting store", function () {
             subject: "Meeting in Paris",
             description: "To discuss landmarks.",
             emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr" },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com" }, { name: "Quan Ping", email: "quan.ping@web.ch" }]
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", track: false },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", track: true }, { name: "Quan Ping", email: "quan.ping@web.ch", track: true }]
         };
         objectIdMock = nodemock.mock("createFromHexString").takes(id).returns(objectId);
         objectIdMock.ObjectID = { createFromHexString: objectIdMock.createFromHexString };
@@ -141,8 +144,8 @@ describe("persistant meeting store", function () {
             subject: "Meeting in Paris",
             description: "To discuss landmarks.",
             emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false }]
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: true },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false, track: true }]
         };
         var after = {
             _id: id,
@@ -155,8 +158,8 @@ describe("persistant meeting store", function () {
             subject: "Meeting in Paris",
             description: "To discuss landmarks.",
             emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: true },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: true }]
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: true, track: true },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: true, track: true }]
         };
 
         var update = {
@@ -195,8 +198,8 @@ describe("persistant meeting store", function () {
             subject: "Meeting in Paris",
             description: "To discuss landmarks.",
             emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false }]
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: false },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: false }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false, track: false }]
         };
         var after = {
             _id: id,
@@ -209,8 +212,8 @@ describe("persistant meeting store", function () {
             subject: "Meeting in Paris",
             description: "To discuss landmarks.",
             emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false }]
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: false },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: false }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false, track: false }]
         };
 
         var update = {
@@ -237,6 +240,69 @@ describe("persistant meeting store", function () {
         });
     });
 
+    it("#updateTracking should update which meeting participants are tracked", function (done) {
+        var id = { id: "Imitation instance of ObjectID" };
+        var before = {
+            _id: id,
+            start: new Date(2010, 1, 1, 5, 30, 0, 0),
+            end: new Date(2010, 1, 1, 6, 0, 0, 0),
+            location: "Eiffel Tower",
+            isGeocoded: true,
+            latitude: 48.85869,
+            longitude: 2.294285,
+            subject: "Meeting in Paris",
+            description: "To discuss landmarks.",
+            emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: false },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: false },
+                { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false, track: true },
+                { name: "Bismuth Cewl", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false },
+                { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: true }]
+        };
+        var after = {
+            _id: id,
+            start: new Date(2010, 1, 1, 5, 30, 0, 0),
+            end: new Date(2010, 1, 1, 6, 0, 0, 0),
+            location: "Eiffel Tower",
+            isGeocoded: true,
+            latitude: 48.85869,
+            longitude: 2.294285,
+            subject: "Meeting in Paris",
+            description: "To discuss landmarks.",
+            emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: true },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true },
+               { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false, track: true },
+               { name: "Bismuth Cewl", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false },
+               { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: false }]
+        };
+
+        var update = {
+            $set: {
+                "organiser.track": true,
+                "attendees.0.track": true,
+                "attendees.3.track": false
+            }
+        };
+        collectionMock.mock("update").takes({ _id: id }, update, { w: 1 }, function () { }).calls(3, [null, undefined]);
+
+        beforeTest();
+        meetingStore.create(dbMock, function (error, store) {
+            assert.strictEqual(error, null, "#error after initialisation should be null.");
+
+            store.updateTracking(before, [{ person: before.organiser, track: true }, { person: before.attendees[0], track: true }, { person: before.attendees[3], track: false }], function (error) {
+                
+                assert.strictEqual(error, null, "#error after update should be null.");
+                assert.deepEqual(before, after, "meeting should be updated to reflect database state");
+
+                afterTest();
+                assertMocks();
+                done();
+            });
+        });
+    });
+
+
     it("#remove should remove records successfully", function (done) {
         var id = { id: "Imitation instance of ObjectID" };
         var record = {
@@ -248,8 +314,8 @@ describe("persistant meeting store", function () {
             subject: "Meeting in Paris",
             description: "To discuss landmarks.",
             emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr" },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com" }, { name: "Quan Ping", email: "quan.ping@web.ch" }]
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", track: false },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", track: true }, { name: "Quan Ping", email: "quan.ping@web.ch", track: false }]
         };
         collectionMock.mock("remove").takes({ _id: id }, { w: 1 }, function () { }).calls(2, [null, undefined]);
 
@@ -276,8 +342,8 @@ describe("persistant meeting store", function () {
             subject: "Meeting in Paris",
             description: "To discuss le landmarks.",
             emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr" },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com" }, { name: "Quan Ping", email: "quan.ping@web.ch" }]
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", track: true },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", track: true }, { name: "Quan Ping", email: "quan.ping@web.ch", track: false }]
         }, {
             _id: { id: "Imitation instance of ObjectID2" },
             start: new Date(2010, 1, 1, 6, 30, 0, 0),
@@ -289,8 +355,8 @@ describe("persistant meeting store", function () {
             subject: "Meeting in Berlin",
             description: "To discuss ze landmarks.",
             emailId: "7392ea32421b213c4d2ddba3010@somewhere.com",
-            organiser: { name: "Johnas Schmidt", email: "j.schmidt@web.de" },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com" }, { name: "Ian Ling", email: "ian.ling@web.ch" }]
+            organiser: { name: "Johnas Schmidt", email: "j.schmidt@web.de", track: true },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", track: true }, { name: "Ian Ling", email: "ian.ling@web.ch", track: true }]
         }];
         var start = new Date(2010, 1, 1, 5, 30);
         var end = new Date(2010, 1, 1, 6, 30);

@@ -34,11 +34,13 @@ describe("emailHandler", function () {
                 end: new Date(Date.UTC(2013, 4, 23, 1, 0, 0, 0)),
                 organiser: {
                     name: "Pierre Curie",
-                    email: "pierre.curie@live.com"
+                    email: "pierre.curie@live.com",
+                    track: true
                 },
                 attendees: [{
                     name: "John Smith",
-                    email: "johnny.smith@gmail.com"
+                    email: "johnny.smith@gmail.com",
+                    track: true
                 }],
                 subject: "Meeting Subject",
                 description: "Meeting body.",
