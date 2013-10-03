@@ -5,7 +5,6 @@ var nodemock = require("nodemock");
 describe("notificationmanager", function () {
     
     var app;
-    var persistancy;
     var locationStore;
     var meetingStore;
     var rulesModule, rules;
@@ -55,35 +54,25 @@ describe("notificationmanager", function () {
 
         mockery.registerAllowables(allowedModules);
 
-        persistancy = nodemock.mock("connect").takes(function () { }).calls(0, [null, { meetings: meetingStore, locations: locationStore }]);
-        //locationStorage = nodemock.mock("create").returns(locationStore);
-        //meetingStorage = nodemock.mock("create").takes({}, function(){}).calls(1, meetingStore);
         rulesModule = nodemock.mock("create").takes(app, locationStore).returns(rules);
-
+       
         mockery.registerMock("./notificationrules", rulesModule.create);
-        mockery.registerMock("./persistancy", persistancy);
-        //mockery.registerMock("./persistantmeetingstore", meetingStorage);
         mockery.registerMock("node-schedule", scheduler);
         
         mockery.enable({ useCleanCache: true });
 
-        require("../lib/notificationmanager")(app, function (error, instance) {
-            assert.strictEqual(error, null, "#start should not return an error.");
-            nm = instance;
-            callback();
-        });
+        nm = require("../lib/notificationmanager")(app, { meetings: meetingStore, locations: locationStore });
+        callback();
     }
 
     function endTest() {
         rulesModule.assertThrows();
-        persistancy.assertThrows();
         scheduler.assertThrows();
     }
 
     afterEach(function () {
         rules = undefined;
         locationStore = undefined;
-        persistancy = undefined;
         meetingStore = undefined;
         rulesModule = undefined;
         meetingsWithin = undefined;
@@ -131,6 +120,9 @@ describe("notificationmanager", function () {
         };
         meetingStore = nodemock.mock("add").takes(meeting, function () { }).calls(1, null);
 
+        var rulesMock = nodemock.mock("initial").takes(meeting, true);
+
+        rules = rulesMock;
         beginTest(function () {
 
             meeting.start = new Date(meetingStore.findMeetingsWithin.end + 1);
@@ -139,6 +131,7 @@ describe("notificationmanager", function () {
             nm.handleMeeting(meeting);
 
             endTest();
+            rulesMock.assertThrows();
             meetingStore.assertThrows();
             assert.strictEqual(meetingStore.findMeetingsWithin.count, 1, "#findMeetingsWithin() should only be called once at the start.");
 
@@ -169,7 +162,7 @@ describe("notificationmanager", function () {
         meetingStore = nodemock.mock("add").takes(meeting, function () { }).calls(1, null);
         meetingStore = meetingStore.mock("remove").takes(meeting, function () { }).calls(1, null);
 
-        var rulesMock = nodemock;
+        var rulesMock = nodemock.mock("initial").takes(meeting, true);
 
         var minutesBefore = [0, 5, 15, 30];
 
@@ -179,13 +172,13 @@ describe("notificationmanager", function () {
             var scheduleDate = new Date(startTime - (minutesBefore[i] * minute));
             scheduleDate.time = scheduleDate.getTime();
             scheduler = scheduler.mock("scheduleJob").takes(scheduleDate, function () { }).calls(1);
-            rulesMock = rulesMock.mock("runLogic").takes(meeting, minutesBefore[i], function () { }).calls(2, [[latePerson]]);
+            rulesMock = rulesMock.mock("statusUpdate").takes(meeting, minutesBefore[i], function () { }).calls(2, [[latePerson]]);
             if (minutesBefore[i] > 0) {
                 meetingStore = meetingStore.mock("updateNotifiedLatePersons").takes(meeting, [latePerson], function () { }).calls(2, null);
             }
         }
 
-        rules = rulesMock.runLogic;
+        rules = rulesMock;
 
 
         beginTest(function () {
@@ -238,7 +231,7 @@ describe("notificationmanager", function () {
                 var scheduleDate = new Date(meeting.start.getTime() - (minutesBefore[i] * minute));
                 scheduleDate.time = scheduleDate.getTime();
                 scheduler = scheduler.mock("scheduleJob").takes(scheduleDate, function () { }).calls(1);
-                rulesMock = rulesMock.mock("runLogic").takes(meeting, minutesBefore[i], function () { }).calls(2, [[latePerson]]);
+                rulesMock = rulesMock.mock("statusUpdate").takes(meeting, minutesBefore[i], function () { }).calls(2, [[latePerson]]);
 
                 if (minutesBefore[i] > 0) {
                     meetingStore = meetingStore.mock("updateNotifiedLatePersons").takes(meeting, [latePerson], function () { }).calls(2, null);
@@ -247,7 +240,7 @@ describe("notificationmanager", function () {
             meetingStore = meetingStore.mock("remove").takes(meeting, function () { }).calls(1, null);
         }
 
-        rules = rulesMock.runLogic;
+        rules = rulesMock;
 
         beginTest(function () {
 

@@ -1,0 +1,51 @@
+!!! Strict
+html
+  head
+    style(type="text/css").
+      body { font: 13px Arial, sans-serif; color: #222; } 
+      .subtle { color: #888; vertical-align: top; width: 70px; } 
+      h2 { font-size: 16px; } 
+      ul { margin:0px 0px 0px 26px; padding-left:0px; } 
+      .map { background-color:#FAFAFA; border: 0px; }
+  body
+    if occursInFuture
+      if isGeocoded
+        a(href="#{link}")
+          table(class="map")
+            tbody
+              tr
+                td
+                  img(src!="https://dev.virtualearth.net/REST/v1/Imagery/Map/Road?ms=600,400&pp=#{latitude},#{longitude};46&key=#{mapskey}", height="400", width="600")
+          //- img(src!="http://maps.googleapis.com/maps/api/staticmap?size=400x400&sensor=false&markers=#{latitude},#{longitude}")
+        p We have received and are tracking your meeting. There's nothing more you need to do.
+        p You can configure tracking settings for this meeting on the following link:
+          a(href="#{link}") #{link}
+      else
+        p We received your meeting, but can't track it until you tell us where it will be held.
+        p Point us to where your meeting will be held, and configure its tracking settings on the following link: 
+          a(href="#{link}") #{link}
+    else
+      p We received your meeting, but can't track it because it seems to occur in the past.
+    p A summary of the meeting you sent us is provided below.
+    h2 #{subject}
+    p !{description}
+    table
+      tr
+        td(class="subtle") When
+        td #{start} - #{end}
+      tr
+        td(class="subtle") Where
+        if isGeocoded
+          td #{location} (
+            a(href="http://bing.com/maps/?q=#{latitude},#{longitude}") map
+            //- a(href="http://maps.google.com/?q=#{latitude},#{longitude}") map
+            | )
+        else
+          td #{location}
+      tr
+        td(class="subtle") Who
+        td
+          ul
+            each person in people
+              li 
+                a(href="mailto:#{person.email}") #{person.name}
