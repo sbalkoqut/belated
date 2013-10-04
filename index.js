@@ -1,3 +1,5 @@
 var app = require("./lib/app");
 
-app();
+require('./lib/config')(function (configuration) {
+    app(configuration);
+});
