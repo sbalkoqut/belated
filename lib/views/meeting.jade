@@ -21,7 +21,7 @@ html
         h3 Where
         div(id="maparea")
           p #{location}
-          if isGeocoded
+          if isLocationDetermined
             p(id="mapinstructions") Drag the blue push pin, or double-click on the map, to adjust the coordinates of your meeting.
           else
             div.alert.alert-info
