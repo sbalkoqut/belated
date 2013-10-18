@@ -6,6 +6,7 @@ describe("notificationmanager", function () {
     
     var meetingStore;
     var locationStore;
+    var locationDefaults;
     var dataStores;
     var notificationRules;
     var notificationLogic;
@@ -29,11 +30,15 @@ describe("notificationmanager", function () {
             return schedule.schedule(meeting);
         });
         geocoder = nodemock.mock("random").fail();
+        locationDefaults = nodemock.mock("random").fail();
 
         mockery.registerMock("./notificationrules", notificationRules.create);
         mockery.registerMock("./notificationscheduler", scheduler.create);
         mockery.registerMock("./geocoder", function (location, callback) {
             geocoder.geocode(location, callback);
+        });
+        mockery.registerMock("./locationdefaults", function (email) {
+            return locationDefaults.defaultFor(email);
         });
         
         var log = nodemock.mock("create").takes("noti").returns(nodemock.ignore("log").log);
@@ -81,6 +86,7 @@ describe("notificationmanager", function () {
             meetingStore.mock("findMeetingBy").takes(meeting.organiser.email, meeting.calUId, function () { }).calls(2, [null, storedMeeting]);
             geocoder.mock("geocode").takes(meeting.location, function () { }).calls(1, [null, geocodedLocation]);
             meetingStore.mock("add").takes(insertedMeeting, function () { }).calls(1, [null]);
+            locationDefaults.mock("defaultFor").takes(meeting.organiser.email).returns({ latitude: 0, longitude: 0 });
 
             var occursInFuture = { mock: occursInFuture };
             schedule.mock("schedule").takes(insertedMeeting).returns(occursInFuture);
@@ -91,6 +97,66 @@ describe("notificationmanager", function () {
             assertOK();
             done();
         });
+
+        it("should update, schedule & send confirmation for new meetings without locations", function (done) {
+            var meeting = {
+                organiser: { name: "David Dumblebee", email: "d.dumblebee@gmail.com" },
+                calUId: "3ABCA9221A8726DD@gmail.com",
+                location: ""
+            };
+            var insertedMeeting = {
+                organiser: { name: "David Dumblebee", email: "d.dumblebee@gmail.com" },
+                calUId: "3ABCA9221A8726DD@gmail.com",
+                location: "",
+                latitude: 82.32,
+                longitude: 132.32,
+                isLocationDetermined: false
+            };
+            var storedMeeting = null;
+            meetingStore.mock("findMeetingBy").takes(meeting.organiser.email, meeting.calUId, function () { }).calls(2, [null, storedMeeting]);
+            meetingStore.mock("add").takes(insertedMeeting, function () { }).calls(1, [null]);
+            locationDefaults.mock("defaultFor").takes(meeting.organiser.email).returns({ latitude: 82.32, longitude: 132.32 });
+
+            var occursInFuture = { mock: occursInFuture };
+            schedule.mock("schedule").takes(insertedMeeting).returns(occursInFuture);
+            notificationLogic.mock("initial").takes(insertedMeeting, occursInFuture);
+
+            instance.handleMeetingRequest(meeting);
+
+            assertOK();
+            done();
+        });
+
+        it("should try geocode, update, schedule & send confirmation for new meetings with non-geocodable locations", function (done) {
+            var meeting = {
+                organiser: { name: "David Dumblebee", email: "d.dumblebee@gmail.com" },
+                calUId: "3ABCA9221A8726DD@gmail.com",
+                location: "South Building, Floor 5"
+            };
+            var insertedMeeting = {
+                organiser: { name: "David Dumblebee", email: "d.dumblebee@gmail.com" },
+                calUId: "3ABCA9221A8726DD@gmail.com",
+                location: "South Building, Floor 5",
+                latitude: 82.32,
+                longitude: 132.32,
+                isLocationDetermined: false
+            };
+            var storedMeeting = null;
+            meetingStore.mock("findMeetingBy").takes(meeting.organiser.email, meeting.calUId, function () { }).calls(2, [null, storedMeeting]);
+            geocoder.mock("geocode").takes(meeting.location, function () { }).calls(1, [new RangeError("No results."), null]);
+            meetingStore.mock("add").takes(insertedMeeting, function () { }).calls(1, [null]);
+            locationDefaults.mock("defaultFor").takes(meeting.organiser.email).returns({ latitude: 82.32, longitude: 132.32 });
+
+            var occursInFuture = { mock: occursInFuture };
+            schedule.mock("schedule").takes(insertedMeeting).returns(occursInFuture);
+            notificationLogic.mock("initial").takes(insertedMeeting, occursInFuture);
+
+            instance.handleMeetingRequest(meeting);
+
+            assertOK();
+            done();
+        });
+
 
         it("should geocode, update, schedule & send confirmation for updated meetings with changed locations", function (done) {
             var meeting = {
@@ -117,6 +183,7 @@ describe("notificationmanager", function () {
             meetingStore.mock("findMeetingBy").takes(meeting.organiser.email, meeting.calUId, function () { }).calls(2, [null, storedMeeting]);
             geocoder.mock("geocode").takes(meeting.location, function () { }).calls(1, [null, geocodedLocation]);
             meetingStore.mock("updateDetail").takes(storedMeeting, insertedMeeting, function () { }).calls(2, [null]);
+            locationDefaults.mock("defaultFor").takes(meeting.organiser.email).returns({ latitude: 0, longitude: 0 });
 
             var occursInFuture = { mock: occursInFuture };
             schedule.mock("schedule").takes(storedMeeting).returns(occursInFuture);
@@ -150,6 +217,7 @@ describe("notificationmanager", function () {
             };
             meetingStore.mock("findMeetingBy").takes(meeting.organiser.email, meeting.calUId, function () { }).calls(2, [null, storedMeeting]);
             meetingStore.mock("updateDetail").takes(storedMeeting, insertedMeeting, function () { }).calls(2, [null]);
+            locationDefaults.mock("defaultFor").takes(meeting.organiser.email).returns({ latitude: 0, longitude: 0 });
 
             var occursInFuture = { mock: occursInFuture };
             schedule.mock("schedule").takes(storedMeeting).returns(occursInFuture);
@@ -227,6 +295,7 @@ describe("notificationmanager", function () {
         meetingStore.assertThrows();
         locationStore.assertThrows();
         schedule.assertThrows();
+        locationDefaults.assertThrows();
     }
 
     afterEach(function () {
@@ -235,6 +304,7 @@ describe("notificationmanager", function () {
         mockery.deregisterMock("./notificationscheduler");
         mockery.deregisterMock("./geocoder");
         mockery.deregisterMock("./log");
+        mockery.deregisterMock("./locationdefaults");
         mockery.deregisterAllowable("util");
         mockery.deregisterAllowable("../lib/notificationmanager");
     });
