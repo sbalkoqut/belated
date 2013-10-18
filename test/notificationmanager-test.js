@@ -45,7 +45,7 @@ describe("notificationmanager", function () {
         mockery.registerMock("./log", log.create);
        
         mockery.registerAllowable("util");
-        mockery.registerAllowable("../lib/notificationmanager")
+        mockery.registerAllowable("../lib/notificationmanager");
         mockery.enable({ useCleanCache: true });
     });
     
