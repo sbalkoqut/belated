@@ -4,6 +4,8 @@ html
     title Meeting
     style(type="text/css").
       #participantArea { list-style-type: none; padding: 0px 0px 0px 20px; }    
+      p { word-wrap: break-word; }
+      #locationSearch { width: 150px; }
     link(rel='stylesheet', href='/stylesheets/bootstrap.min.css', type='text/css' )
     link(rel='stylesheet', href='/stylesheets/bootstrap-theme.min.css', type='text/css' )
     script(type="text/javascript", src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0")
@@ -22,17 +24,25 @@ html
         div(id="maparea")
           p #{location}
           if isLocationDetermined
-            p(id="mapinstructions") Drag the blue push pin, or double-click on the map, to adjust the coordinates of your meeting.
+            p.help-block(id="mapinstructions") Drag the blue push pin, or double-click on the map, to adjust the coordinates of your meeting.
           else
             div.alert.alert-info
               p We can't track your meeting until you tell us the coordinates of your meeting.
-            p(id="mapinstructions") Double-click on the map to set the coordinates of your meeting.
-          label(for="locationSearch") Center the map at
-          |  
-          input(name="locationSearch", id="locationSearch")
-          |  
-          input(type="button", id="locationSearchButton", value="Go").btn.btn-sm.btn-default
+            p.help-block(id="mapinstructions") Double-click on the map to set the coordinates of your meeting.
+          
+          form.form-inline(role="form")
+            div.form-group
+              label(for="locationSearch") Center the map at
+              |  
+              input.form-control.input-sm(name="locationSearch", id="locationSearch")
+              |  
+              input(type="button", id="locationSearchButton", value="Go").btn.btn-sm.btn-default
           div(id="map", style="position:relative; width:100%; height:400px;")
+        if conferenceURL
+          h3 Online Presence
+          | This meeting is also set to occur on Google Hangout. 
+          a(href="#{conferenceURL}") Join now
+          | .
         h3 Who
         ul(id="participantArea")
           li

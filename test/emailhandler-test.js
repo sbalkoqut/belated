@@ -43,7 +43,8 @@ describe("emailHandler", function () {
                 description: "Meeting body.",
                 emailId: "<BLU501-EAS310DE2D852A184325678890876F1@gbm.phl>",
                 calUId: "040000008200E00074C5B7101A82E00800000000D09C51E09D57CE01000000000000000010000000E5D02B2E0D031B4A80BB9421D37A70E8",
-                calSequence: 1
+                calSequence: 1,
+                conferenceURL: null
             };
             var handler = emailhandler(function (error, method, meeting) {
                 assert.strictEqual(error, null, "No error should occur.");
