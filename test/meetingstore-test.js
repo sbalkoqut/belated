@@ -9,7 +9,7 @@ describe("persistant meeting store", function () {
     var objectIdMock;
     var meetingStore;
 
-    var allowedModules = ["./utils", "../lib/meetingstore"];
+    var allowedModules = ["./utils", "./validationhelper", "../lib/meetingstore"];
 
     beforeEach(function () {
         collectionMock = nodemock
@@ -179,9 +179,9 @@ describe("persistant meeting store", function () {
             emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
             calUId: "81BA189AADEF785F30@somewhere.com",
             calSequence: 2,
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: true, track: true },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true, deleted: false },
-                { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: true, track: true, deleted: false }],
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: true, track: true, travelMode: null, travelEta: null },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: false },
+                { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: true, track: true, travelMode: null, travelEta: null, deleted: false }],
             conferenceURL: "https://plus.google.com/hangouts/_/calendar/uSna91BQkkaBeUs.oss6sfipsampleurl"
         };
 
@@ -240,8 +240,8 @@ describe("persistant meeting store", function () {
             emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
             calUId: "81BA189AADEF785F30@somewhere.com",
             calSequence: 1,
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: false },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: false, deleted: false }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false, track: false, deleted: false }],
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: false, travelMode: null, travelEta: null },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false }],
             conferenceURL: "https://plus.google.com/hangouts/_/calendar/uSna91BQkkaBeUs.oss5Qusasampleurl"
         };
 
@@ -304,11 +304,11 @@ describe("persistant meeting store", function () {
             emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
             calUId: "81BA189AADEF785F30@somewhere.com",
             calSequence: 1,
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: true },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true, deleted: false },
-               { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false, track: true, deleted: false },
-               { name: "Bismuth Cewl", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false, deleted: false },
-               { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: false, deleted: false }],
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: true, travelMode: null, travelEta: null },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: false },
+               { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: false },
+               { name: "Bismuth Cewl", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false },
+               { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false }],
             conferenceURL: "https://plus.google.com/hangouts/_/calendar/uSna91BQkkaBeUs.oss4AAAAsampleurl"
         };
 
@@ -408,13 +408,13 @@ describe("persistant meeting store", function () {
             emailId: "71A2ea18321b213c4d2deca3423@somewhere.com",
             calUId: "81BA189AADEF785F30@somewhere.com",
             calSequence: 2,
-            organiser: { name: "Pierre L.", email: "pierre.lantern@web.fr", notifiedLate: true, track: true },
+            organiser: { name: "Pierre L.", email: "pierre.lantern@web.fr", notifiedLate: true, track: true, travelMode: null, travelEta: null },
             attendees: [
-                { name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: true, track: true, deleted: true },
-                { name: "Q. Ping", email: "quan.ping@web.ch", notifiedLate: true, track: true, deleted: false },
-                { name: "Charlie S.", email: "charlie.s@web.co.uk", notifiedLate: false, track: false, deleted: false },
-                { name: "Bismuth Cewl", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false, deleted: false },
-                { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: true, deleted: false }],
+                { name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: true, track: true, travelMode: null, travelEta: null, deleted: true },
+                { name: "Q. Ping", email: "quan.ping@web.ch", notifiedLate: true, track: true, travelMode: null, travelEta: null, deleted: false },
+                { name: "Charlie S.", email: "charlie.s@web.co.uk", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false },
+                { name: "Bismuth Cewl", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false },
+                { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: false }],
             conferenceURL: "https://plus.google.com/hangouts/_/calendar/uSna91BQkkaBeUs.oss4AAAAsampleurl"
         };
         var secondUpdate = {
@@ -464,13 +464,13 @@ describe("persistant meeting store", function () {
             emailId: "71A2ea18321b213c4d2deca3423@somewhere.com",
             calUId: "81BA189AADEF785F30@somewhere.com",
             calSequence: 4,
-            organiser: { name: "Pierre L.", email: "pierre.lantern@web.fr", notifiedLate: false, track: true },
+            organiser: { name: "Pierre L.", email: "pierre.lantern@web.fr", notifiedLate: false, travelMode: null, travelEta: null, track: true },
             attendees: [
-                { name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true, deleted: false },
-                { name: "Q. Ping", email: "quan.ping@web.ch", notifiedLate: false, track: true, deleted: false },
-                { name: "Charlie S.", email: "charlie.s@web.co.uk", notifiedLate: false, track: false, deleted: false },
-                { name: "Bismuth Cewl", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false, deleted: false },
-                { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: true, deleted: false }],
+                { name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: false },
+                { name: "Q. Ping", email: "quan.ping@web.ch", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: false },
+                { name: "Charlie S.", email: "charlie.s@web.co.uk", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false },
+                { name: "Bismuth Cewl", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false },
+                { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: false }],
             conferenceURL: "https://plus.google.com/hangouts/_/calendar/uSna91BQkkaBeUs.oss4AAAAsampleurl"
         };
 
@@ -533,14 +533,14 @@ describe("persistant meeting store", function () {
             emailId: "8234567890b213c4d2deca3423@somewhere.com",
             calUId: "81BA189AADEF785F30@somewhere.com",
             calSequence: 5,
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: true },
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: true, travelMode: null, travelEta: null },
             attendees: [
-                { name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true, deleted: true },
-                { name: "Q. Ping", email: "quan.ping@web.ch", notifiedLate: false, track: true, deleted: true },
-                { name: "Charlie S.", email: "charlie.s@web.co.uk", notifiedLate: false, track: false, deleted: false },
-                { name: "Bismuth C.", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false, deleted: false },
-                { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: true, deleted: true },
-                { name: "David D.", email: "d.david@gmail.com", notifiedLate: false, track: true, deleted: false }],
+                { name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: true },
+                { name: "Q. Ping", email: "quan.ping@web.ch", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: true },
+                { name: "Charlie S.", email: "charlie.s@web.co.uk", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false },
+                { name: "Bismuth C.", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false },
+                { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: true },
+                { name: "David D.", email: "d.david@gmail.com", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: false }],
             conferenceURL: "https://plus.google.com/hangouts/_/calendar/uSna91BQkkaBeUs.oss5BBBBsampleurl"
         };
 
@@ -573,6 +573,71 @@ describe("persistant meeting store", function () {
 
             });
         });
+    });
+
+    it("#updateTravelPlan should update travelMode and travelEta for one person", function (done) {
+        var id = { id: "Imitation instance of ObjectID" };
+        var meeting = {
+            _id: id,
+            start: new Date(2010, 1, 1, 5, 30, 0, 0),
+            end: new Date(2010, 1, 1, 6, 0, 0, 0),
+            location: "Eiffel Tower",
+            isLocationDetermined: true,
+            latitude: 48.85869,
+            longitude: 2.294285,
+            subject: "Meeting in Paris",
+            description: "To discuss landmarks.",
+            emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
+            calUId: "81BA189AADEF785F30@somewhere.com",
+            calSequence: 1,
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: true, track: true },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: true, track: true }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: true, track: true }],
+            conferenceURL: null
+        };
+        var travelPlan = {
+            person: meeting.attendees[1],
+            mode: "car",
+            eta: new Date(Date.now() + (15 * 60 * 1000))
+        };
+        var update = {
+            $set: {
+                "attendees.1.travelMode": travelPlan.mode,
+                "attendees.1.travelEta": travelPlan.eta
+            }
+        };
+        var updatedMeeting = {
+            _id: id,
+            start: new Date(2010, 1, 1, 5, 30, 0, 0),
+            end: new Date(2010, 1, 1, 6, 0, 0, 0),
+            location: "Eiffel Tower",
+            isLocationDetermined: true,
+            latitude: 48.85869,
+            longitude: 2.294285,
+            subject: "Meeting in Paris",
+            description: "To discuss landmarks.",
+            emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
+            calUId: "81BA189AADEF785F30@somewhere.com",
+            calSequence: 1,
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: true, track: true, travelMode: null, travelEta: null },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: true, track: true, travelMode: null, travelEta: null }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: true, track: true, travelMode: travelPlan.mode, travelEta: travelPlan.eta }],
+            conferenceURL: null
+        };
+
+        collectionMock.mock("update").takes({ _id: id }, update, { w: 1 }, function () { }).calls(3, [null, undefined]);
+
+        beforeTest();
+        meetingStore.create(dbMock, function (error, store) {
+            assert.strictEqual(error, null, "#error after initialisation should be null.");
+
+            store.updateTravelPlan(meeting, travelPlan, function (error) {
+                assert.strictEqual(error, null, "#error after update should be null.");
+
+                afterTest();
+                assertMocks();
+                done();
+            });
+        });
+
     });
 
     it("#remove should remove records successfully", function (done) {

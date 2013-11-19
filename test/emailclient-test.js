@@ -1,7 +1,10 @@
 var emailClient = require("../lib/emailclient"); // Load Node Assert module
 var assert = require("assert");
 var log = require("../lib/log")
-describe('emailClient', function () {
+var mockery = require("mockery");
+var nodemock = require("nodemock");
+
+describe("emailClient", function () {
     before(function () {
         log.enabled = false;
     });
@@ -9,7 +12,7 @@ describe('emailClient', function () {
         log.enabled = true;
     });
 
-    describe('#listen()', function () {
+    describe("#listen()", function () {
 
         var emailReceivedCount;
         var emailSentCount;
