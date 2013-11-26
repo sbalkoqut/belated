@@ -24,7 +24,7 @@ html
             each attendee in attendees
               li 
                 a(href="mailto:#{attendee.person.email}") #{attendee.person.name}
-                - if(!attendee.comfortable)
-                  strong #{attendee.message}
-                - else
-                  | #{attendee.message}
+                if !attendee.comfortable
+                  strong  - #{attendee.message}.
+                else
+                  |  - #{attendee.message}.
