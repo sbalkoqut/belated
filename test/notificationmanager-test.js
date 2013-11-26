@@ -32,7 +32,7 @@ describe("notificationmanager", function () {
         geocoder = nodemock.mock("random").fail();
         locationDefaults = nodemock.mock("random").fail();
 
-        mockery.registerMock("./notificationrules", notificationRules.create);
+        mockery.registerMock("./notificationlogic", notificationRules.create);
         mockery.registerMock("./notificationscheduler", scheduler.create);
         mockery.registerMock("./geocoder", function (location, callback) {
             geocoder.geocode(location, callback);
@@ -300,7 +300,7 @@ describe("notificationmanager", function () {
 
     afterEach(function () {
         mockery.disable();
-        mockery.deregisterMock("./notificationrules");
+        mockery.deregisterMock("./notificationlogic");
         mockery.deregisterMock("./notificationscheduler");
         mockery.deregisterMock("./geocoder");
         mockery.deregisterMock("./log");

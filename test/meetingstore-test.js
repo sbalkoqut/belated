@@ -179,9 +179,9 @@ describe("persistant meeting store", function () {
             emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
             calUId: "81BA189AADEF785F30@somewhere.com",
             calSequence: 2,
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: true, track: true, travelMode: null, travelEta: null },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: false },
-                { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: true, track: true, travelMode: null, travelEta: null, deleted: false }],
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: true, track: true, travelMode: "unspecified", travelEta: null },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true, travelMode: "unspecified", travelEta: null, deleted: false },
+                { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: true, track: true, travelMode: "unspecified", travelEta: null, deleted: false }],
             conferenceURL: "https://plus.google.com/hangouts/_/calendar/uSna91BQkkaBeUs.oss6sfipsampleurl"
         };
 
@@ -195,12 +195,11 @@ describe("persistant meeting store", function () {
 
         beforeTest();
         meetingStore.create(dbMock, function (error, store) {
-            assert.strictEqual(error, null, "#error after initialisation should be null.");
 
+            assert.strictEqual(error, null, "#error after initialisation should be null.");
             store.updateNotifiedLatePersons(before, [before.organiser, before.attendees[1]], function (error) {
                 assert.strictEqual(error, null, "#error after update should be null.");
                 assert.deepEqual(before, after, "meeting should be updated to reflect database state");
-
                 afterTest();
                 assertMocks();
                 done();
@@ -240,8 +239,8 @@ describe("persistant meeting store", function () {
             emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
             calUId: "81BA189AADEF785F30@somewhere.com",
             calSequence: 1,
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: false, travelMode: null, travelEta: null },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false }],
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: false, travelMode: "unspecified", travelEta: null },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: false, travelMode: "unspecified", travelEta: null, deleted: false }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false, track: false, travelMode: "unspecified", travelEta: null, deleted: false }],
             conferenceURL: "https://plus.google.com/hangouts/_/calendar/uSna91BQkkaBeUs.oss5Qusasampleurl"
         };
 
@@ -304,11 +303,11 @@ describe("persistant meeting store", function () {
             emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
             calUId: "81BA189AADEF785F30@somewhere.com",
             calSequence: 1,
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: true, travelMode: null, travelEta: null },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: false },
-               { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: false },
-               { name: "Bismuth Cewl", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false },
-               { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false }],
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: true, travelMode: "unspecified", travelEta: null },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true, travelMode: "unspecified", travelEta: null, deleted: false },
+               { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: false, track: true, travelMode: "unspecified", travelEta: null, deleted: false },
+               { name: "Bismuth Cewl", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false, travelMode: "unspecified", travelEta: null, deleted: false },
+               { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: false, travelMode: "unspecified", travelEta: null, deleted: false }],
             conferenceURL: "https://plus.google.com/hangouts/_/calendar/uSna91BQkkaBeUs.oss4AAAAsampleurl"
         };
 
@@ -408,13 +407,13 @@ describe("persistant meeting store", function () {
             emailId: "71A2ea18321b213c4d2deca3423@somewhere.com",
             calUId: "81BA189AADEF785F30@somewhere.com",
             calSequence: 2,
-            organiser: { name: "Pierre L.", email: "pierre.lantern@web.fr", notifiedLate: true, track: true, travelMode: null, travelEta: null },
+            organiser: { name: "Pierre L.", email: "pierre.lantern@web.fr", notifiedLate: true, track: true, travelMode: "unspecified", travelEta: null },
             attendees: [
-                { name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: true, track: true, travelMode: null, travelEta: null, deleted: true },
-                { name: "Q. Ping", email: "quan.ping@web.ch", notifiedLate: true, track: true, travelMode: null, travelEta: null, deleted: false },
-                { name: "Charlie S.", email: "charlie.s@web.co.uk", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false },
-                { name: "Bismuth Cewl", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false },
-                { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: false }],
+                { name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: true, track: true, travelMode: "unspecified", travelEta: null, deleted: true },
+                { name: "Q. Ping", email: "quan.ping@web.ch", notifiedLate: true, track: true, travelMode: "unspecified", travelEta: null, deleted: false },
+                { name: "Charlie S.", email: "charlie.s@web.co.uk", notifiedLate: false, track: false, travelMode: "unspecified", travelEta: null, deleted: false },
+                { name: "Bismuth Cewl", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false, travelMode: "unspecified", travelEta: null, deleted: false },
+                { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: true, travelMode: "unspecified", travelEta: null, deleted: false }],
             conferenceURL: "https://plus.google.com/hangouts/_/calendar/uSna91BQkkaBeUs.oss4AAAAsampleurl"
         };
         var secondUpdate = {
@@ -464,13 +463,13 @@ describe("persistant meeting store", function () {
             emailId: "71A2ea18321b213c4d2deca3423@somewhere.com",
             calUId: "81BA189AADEF785F30@somewhere.com",
             calSequence: 4,
-            organiser: { name: "Pierre L.", email: "pierre.lantern@web.fr", notifiedLate: false, travelMode: null, travelEta: null, track: true },
+            organiser: { name: "Pierre L.", email: "pierre.lantern@web.fr", notifiedLate: false, travelMode: "unspecified", travelEta: null, track: true },
             attendees: [
-                { name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: false },
-                { name: "Q. Ping", email: "quan.ping@web.ch", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: false },
-                { name: "Charlie S.", email: "charlie.s@web.co.uk", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false },
-                { name: "Bismuth Cewl", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false },
-                { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: false }],
+                { name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true, travelMode: "unspecified", travelEta: null, deleted: false },
+                { name: "Q. Ping", email: "quan.ping@web.ch", notifiedLate: false, track: true, travelMode: "unspecified", travelEta: null, deleted: false },
+                { name: "Charlie S.", email: "charlie.s@web.co.uk", notifiedLate: false, track: false, travelMode: "unspecified", travelEta: null, deleted: false },
+                { name: "Bismuth Cewl", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false, travelMode: "unspecified", travelEta: null, deleted: false },
+                { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: true, travelMode: "unspecified", travelEta: null, deleted: false }],
             conferenceURL: "https://plus.google.com/hangouts/_/calendar/uSna91BQkkaBeUs.oss4AAAAsampleurl"
         };
 
@@ -533,14 +532,14 @@ describe("persistant meeting store", function () {
             emailId: "8234567890b213c4d2deca3423@somewhere.com",
             calUId: "81BA189AADEF785F30@somewhere.com",
             calSequence: 5,
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: true, travelMode: null, travelEta: null },
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: false, track: true, travelMode: "unspecified", travelEta: null },
             attendees: [
-                { name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: true },
-                { name: "Q. Ping", email: "quan.ping@web.ch", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: true },
-                { name: "Charlie S.", email: "charlie.s@web.co.uk", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false },
-                { name: "Bismuth C.", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false, travelMode: null, travelEta: null, deleted: false },
-                { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: true },
-                { name: "David D.", email: "d.david@gmail.com", notifiedLate: false, track: true, travelMode: null, travelEta: null, deleted: false }],
+                { name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: false, track: true, travelMode: "unspecified", travelEta: null, deleted: true },
+                { name: "Q. Ping", email: "quan.ping@web.ch", notifiedLate: false, track: true, travelMode: "unspecified", travelEta: null, deleted: true },
+                { name: "Charlie S.", email: "charlie.s@web.co.uk", notifiedLate: false, track: false, travelMode: "unspecified", travelEta: null, deleted: false },
+                { name: "Bismuth C.", email: "bismuth.cewl@gmail.com", notifiedLate: false, track: false, travelMode: "unspecified", travelEta: null, deleted: false },
+                { name: "Tony Test", email: "tony@test.com", notifiedLate: false, track: true, travelMode: "unspecified", travelEta: null, deleted: true },
+                { name: "David D.", email: "d.david@gmail.com", notifiedLate: false, track: true, travelMode: "unspecified", travelEta: null, deleted: false }],
             conferenceURL: "https://plus.google.com/hangouts/_/calendar/uSna91BQkkaBeUs.oss5BBBBsampleurl"
         };
 
@@ -618,8 +617,8 @@ describe("persistant meeting store", function () {
             emailId: "8392ea18321b213c4d2deca3423@somewhere.com",
             calUId: "81BA189AADEF785F30@somewhere.com",
             calSequence: 1,
-            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: true, track: true, travelMode: null, travelEta: null },
-            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: true, track: true, travelMode: null, travelEta: null }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: true, track: true, travelMode: travelPlan.mode, travelEta: travelPlan.eta }],
+            organiser: { name: "Pierre Lantern", email: "pierre.lantern@web.fr", notifiedLate: true, track: true, travelMode: "unspecified", travelEta: null },
+            attendees: [{ name: "Seemore Joker", email: "seemore.joker@web.com", notifiedLate: true, track: true, travelMode: "unspecified", travelEta: null }, { name: "Quan Ping", email: "quan.ping@web.ch", notifiedLate: true, track: true, travelMode: travelPlan.mode, travelEta: travelPlan.eta }],
             conferenceURL: null
         };
 
@@ -761,7 +760,14 @@ describe("persistant meeting store", function () {
         collectionMock.mock("find").takes({
             $or: [
                 { "organiser.email": "seemore.joker@web.com" },
-                { "attendees.email": "seemore.joker@web.com" }
+                {
+                    "attendees": {
+                        $elemMatch: {
+                            "email": "seemore.joker@web.com",
+                            "deleted": { $ne: true }
+                        }
+                    }
+                }
             ]
         }).returns(cursorMock);
 
