@@ -1,9 +1,33 @@
+mixin person(person)
+  li
+    input(type="checkbox", value="#{person.email}", checked=(person.track? "checked" : undefined))
+    strong  #{person.name}
+    |  (
+    a(href="mailto:#{person.email}") email
+    | ) 
+    if person.travelMode === "decline"
+      | - unable to attend.
+    else if person.travelMode === "online"
+      | - attending via video conference.
+    else if person.travelMode !== "unspecified"
+      | - 
+      if person.travelMode === "walk"
+        | travelling by foot, 
+      else if person.travelMode === "transit"
+        | travelling by public transport, 
+      else if person.travelMode === "car"
+        | travelling by car, 
+      | estimated arrival 
+      strong #{person.travelEta}
 doctype 5
 html
   head
     title Meeting
     style(type="text/css").
       #participantArea { list-style-type: none; padding: 0px 0px 0px 20px; }    
+      p { word-wrap: break-word; }
+      #locationSearchLabel { font-weight: normal; }
+      #locationSearch { width: 150px; }
     link(rel='stylesheet', href='/stylesheets/bootstrap.min.css', type='text/css' )
     link(rel='stylesheet', href='/stylesheets/bootstrap-theme.min.css', type='text/css' )
     script(type="text/javascript", src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0")
@@ -17,35 +41,38 @@ html
       div.col-sm-8
         p !{description}
         h3 When
-        p #{start} - #{end}
+        p 
+          strong #{start} - #{end}
         h3 Where
         div(id="maparea")
-          p #{location}
+          p
+            strong #{location}
           if isLocationDetermined
-            p(id="mapinstructions") Drag the blue push pin, or double-click on the map, to adjust the coordinates of your meeting.
+            p.help-block(id="mapinstructions") Drag the blue push pin, or double-click on the map, to adjust the coordinates of your meeting.
           else
             div.alert.alert-info
               p We can't track your meeting until you tell us the coordinates of your meeting.
-            p(id="mapinstructions") Double-click on the map to set the coordinates of your meeting.
-          label(for="locationSearch") Center the map at
-          |  
-          input(name="locationSearch", id="locationSearch")
-          |  
-          input(type="button", id="locationSearchButton", value="Go").btn.btn-sm.btn-default
+            p.help-block(id="mapinstructions") Double-click on the map to set the coordinates of your meeting.
+          
+          form.form-inline(role="form")
+            div.form-group
+              label(for="locationSearch", id="locationSearchLabel") Center the map at
+              |  
+              input.form-control.input-sm(name="locationSearch", id="locationSearch")
+              |  
+              input(type="button", id="locationSearchButton", value="Go").btn.btn-sm.btn-default
           div(id="map", style="position:relative; width:100%; height:400px;")
+        if conferenceURL
+          h3 Online Presence
+          | This meeting is also set to occur on Google Hangout. 
+          a(href="#{conferenceURL}") Join now
+          | .
         h3 Who
         ul(id="participantArea")
-          li
-            input(type="checkbox", value="#{organiser.email}", checked=(organiser.track? "checked" : undefined))
-            |  #{organiser.name} (
-            a(href="mailto:#{organiser.email}") email
-            | )
+          +person(organiser)
           each attendee in attendees
-            li
-              input(type="checkbox", value="#{attendee.email}", checked=(attendee.track? "checked" : undefined)) #{attendee.name}
-              |  #{attendee.name} (
-              a(href="mailto:#{attendee.email}") email
-              | )
+            if attendee.deleted !== true
+              +person(attendee)
       div.col-sm-4
         div.panel.panel-default
           div.panel-heading
