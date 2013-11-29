@@ -1,14 +1,31 @@
 ﻿var assert = require("assert");
-var notificationRules = require("../lib/notificationrules");
 var inspect = require("util").inspect;
-var log = require("../lib/log");
+var mockery = require("mockery");
+var nodemock = require("nodemock");
 describe('notificationrules', function () {
-    before(function () {
-        log.enabled = false;
+
+    var notificationRules;
+    beforeEach(function () {
+        var log = nodemock.mock("create").takes("rule").returns({
+            verbose: function () { },
+            info: function () { },
+            warn: function () { },
+            error: function () { }
+        });
+        mockery.registerAllowables(["geo-distance-js", "dateformat", "../lib/notificationrules"]);
+        mockery.registerMock("./log", log.create);
+        mockery.enable({ useCleanCache: true });
+
+        notificationRules = require("../lib/notificationrules");
     });
-    after(function () {
-        log.enabled = true;
+
+
+    afterEach(function () {
+        notificationRules = undefined;
+        mockery.deregisterAll();
+        mockery.disable();
     });
+
 
     var minute = 60 * 1000;
 

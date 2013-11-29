@@ -1,14 +1,27 @@
 ﻿var assert = require("assert");
 var nodemock = require("nodemock");
-var meetingStore = require("../lib/locationstore")
+var mockery = require("mockery");
+
 describe("persistant location store", function () {
 
     var dbMock;
     var collectionMock;
+    var meetingStore;
 
     beforeEach(function () {
         collectionMock = nodemock.mock("ensureIndex").takes({ email: 1 }, { w: 1 }, function () { }).calls(2, [null, null])
         dbMock = nodemock.mock("createCollection").takes("locations", { w: 1 }, function () { }).calls(2, [null, collectionMock]);
+
+        var log = nodemock.mock("create").takes("lsto").returns({
+            verbose: function () { },
+            info: function () { },
+            warn: function () { },
+            error: function () { }
+        });
+        mockery.registerAllowables(["./utils","../lib/locationstore"]);
+        mockery.registerMock("./log", log.create);
+        mockery.enable({ useCleanCache: true });
+        meetingStore = require("../lib/locationstore");
     });
 
     function assertMocks() {
@@ -16,10 +29,15 @@ describe("persistant location store", function () {
         dbMock.assertThrows();
     }
 
+
     afterEach(function () {
+        meetingStore = undefined;
         collectionMock = undefined;
         dbMock = undefined;
+        mockery.deregisterAll();
+        mockery.disable();
     });
+
 
     it("#recordPosition should record positions successfully (where location update interval <1 minute)", function (done) {
         var location = {
