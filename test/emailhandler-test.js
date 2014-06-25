@@ -3,7 +3,6 @@ var mockery = require("mockery");
 var nodemock = require("nodemock");
 var inspect = require("util").inspect;
 var fs = require("fs");
-var log = require("../lib/log")("EHTEST");
 describe("emailHandler", function () {
 
     var allowedModules = ["icalendar", "../lib/emailhandler", "assert", "util", "./icalendar", "./base", "./types", "./rrule", "./timezone", "./event", "./parser", "./log"];
@@ -11,7 +10,6 @@ describe("emailHandler", function () {
     before(function () {
         mockery.enable();
         mockery.registerAllowables(allowedModules);
-        log.enabled = false;
     });
 
     describe("#create", function () {
@@ -69,7 +67,6 @@ describe("emailHandler", function () {
     after(function () {
         mockery.deregisterAllowables(allowedModules);
         mockery.disable();
-        log.enabled = true;
     });
 
 });

@@ -40,8 +40,13 @@ describe("notificationmanager", function () {
         mockery.registerMock("./locationdefaults", function (email) {
             return locationDefaults.defaultFor(email);
         });
-        
-        var log = nodemock.mock("create").takes("noti").returns(nodemock.ignore("log").log);
+
+        var log = nodemock.mock("create").takes("noti").returns({
+            verbose: function () { },
+            info: function () { },
+            warn: function () { },
+            error: function () { }
+        });
         mockery.registerMock("./log", log.create);
        
         mockery.registerAllowable("util");

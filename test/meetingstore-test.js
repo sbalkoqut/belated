@@ -30,7 +30,12 @@ describe("persistant meeting store", function () {
             mongodb.ObjectID = objectIdMock.ObjectID;
         mockery.registerMock("mongodb", mongodb);
 
-        var logMock = nodemock.mock("create").takes("msto").returns(nodemock.ignore("log").log);
+        var logMock = nodemock.mock("create").takes("msto").returns({
+            verbose: function () { },
+            info: function () { },
+            warn: function () { },
+            error: function () { }
+        });
         mockery.registerMock("./log", logMock.create);
 
        // mockery.registerAllowable("./log");

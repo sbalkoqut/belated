@@ -416,6 +416,11 @@
       "version": "0.1.8",
       "from": "node-schedule@0.1.8",
       "resolved": "https://registry.npmjs.org/node-schedule/-/node-schedule-0.1.8.tgz"
+    },
+    "colog": {
+      "version": "1.0.1",
+      "from": "colog@1.0.1",
+      "resolved": "https://registry.npmjs.org/colog/-/colog-1.0.1.tgz"
     }
   }
 }

@@ -13,7 +13,12 @@ describe("#locationdefaults", function () {
         ];
         mockery.registerMock("../defaultlocations.json", rules);
 
-        var log = nodemock.mock("create").takes("locationdefault").returns(nodemock.ignore("log").log);
+        var log = nodemock.mock("create").takes("locationdefault").returns({
+            verbose: function(){},
+            info: function(){},
+            warn: function(){},
+            error: function(){}
+        });
         mockery.registerMock("./log", log.create);
 
         mockery.registerAllowable("./utils");

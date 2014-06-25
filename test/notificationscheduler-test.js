@@ -58,9 +58,14 @@ describe("notificationscheduler", function () {
        
         mockery.registerMock("node-schedule", scheduler);
 
-        var logMock = logMock = function () { return function () { } };
-        mockery.registerMock("./log", logMock);
-        mockery.registerMock("../lib/log", logMock);
+        var log = nodemock.mock("create").takes("shed").returns({
+            verbose: function () { },
+            info: function () { },
+            warn: function () { },
+            error: function () { }
+        });
+        mockery.registerMock("./log", log.create);
+        mockery.registerMock("../lib/log", log.create);
 
         mockery.enable({ useCleanCache: true });
 
